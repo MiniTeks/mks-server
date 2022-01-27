@@ -1,2 +1,1 @@
-# mks
-Minimal Tekton Server
+# Minimal Tekton Server
