@@ -1,0 +1,10 @@
+apiVersion: mkscontroller.example.mks/v1alpha1
+kind: MksTask
+metadata:
+  name: hello
+  namespace: default
+spec:
+  args: args
+  command: ls
+  image: image
+  name: hello4
