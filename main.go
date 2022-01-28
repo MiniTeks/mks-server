@@ -30,57 +30,28 @@ func main() {
 		klog.Fatalf("Error building example clientset: %v", err)
 	}
 
-	deployment := &v1alpha1.MksTask{
-		TypeMeta:   v1.TypeMeta{Kind: "MksTask"},
+	deployment := &v1alpha1.MksPipeline{
+		TypeMeta:   v1.TypeMeta{Kind: "MksPipeline"},
 		ObjectMeta: v1.ObjectMeta{Name: "hello"},
-		Spec:       v1alpha1.MksTaskSpec{Name: "hello4", Image: "image", Command: "ls", Args: "args"},
+		Spec:       v1alpha1.MksPipelineSpec{Name: "hello4", Image: "image", Command: "ls", Args: "args"},
 	}
 
-	crt, err := exampleClient.MkscontrollerV1alpha1().MksTasks("default").Create(context.TODO(), deployment, v1.CreateOptions{})
+	crt, err := exampleClient.MkscontrollerV1alpha1().MksPipelines("default").Create(context.TODO(), deployment, v1.CreateOptions{})
 	if err != nil {
 		klog.Fatalf("Error creating all resources: %v", err)
 	}
 	fmt.Println(crt)
-	deployment1 := &v1alpha1.MksTask{
-		TypeMeta:   v1.TypeMeta{Kind: "MksTask"},
-		ObjectMeta: v1.ObjectMeta{Name: "hello1"},
-		Spec:       v1alpha1.MksTaskSpec{Name: "hello1", Image: "image", Command: "ls", Args: "args"},
-	}
-	crt1, err := exampleClient.MkscontrollerV1alpha1().MksTasks("default").Create(context.TODO(), deployment1, v1.CreateOptions{})
-	if err != nil {
-		klog.Fatalf("Error creating all resources: %v", err)
-	}
-	fmt.Println(crt1)
+	
+	
 
-	deployment2 := &v1alpha1.MksTask{
-		TypeMeta:   v1.TypeMeta{Kind: "MksTask"},
-		ObjectMeta: v1.ObjectMeta{Name: "hello2"},
-		Spec:       v1alpha1.MksTaskSpec{Name: "hello2", Image: "image", Command: "ls", Args: "args"},
-	}
-	crt2, err := exampleClient.MkscontrollerV1alpha1().MksTasks("default").Create(context.TODO(), deployment2, v1.CreateOptions{})
-	if err != nil {
-		klog.Fatalf("Error creating all resources: %v", err)
-	}
-	fmt.Println(crt2)
-
-	deployment3 := &v1alpha1.MksTask{
-		TypeMeta:   v1.TypeMeta{Kind: "MksTask"},
-		ObjectMeta: v1.ObjectMeta{Name: "hello3"},
-		Spec:       v1alpha1.MksTaskSpec{Name: "hello3", Image: "image", Command: "ls", Args: "args"},
-	}
-	crt3, err3 := exampleClient.MkscontrollerV1alpha1().MksTasks("default").Create(context.TODO(), deployment3, v1.CreateOptions{})
-	if err3 != nil {
-		klog.Fatalf("Error creating all resources: %v", err)
-	}
-
-	fmt.Println(crt3)
-	list, err := exampleClient.MkscontrollerV1alpha1().MksTasks("default").Get(context.TODO(), "hello", v1.GetOptions{})
+	
+	list, err := exampleClient.MkscontrollerV1alpha1().MksPipelines("default").Get(context.TODO(), "hello", v1.GetOptions{})
 	if err != nil {
 		klog.Fatalf("Error listing all databases: %v", err)
 	}
 	fmt.Println(list)
 
-	gt, err := exampleClient.MkscontrollerV1alpha1().MksTasks("default").List(context.TODO(), v1.ListOptions{})
+	gt, err := exampleClient.MkscontrollerV1alpha1().MksPipelines("default").List(context.TODO(), v1.ListOptions{})
 	if err != nil {
 		klog.Fatalf("Error listing all databases: %v", err)
 	}

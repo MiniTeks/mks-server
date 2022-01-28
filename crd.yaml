@@ -1,7 +1,7 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: mkstasks.mkscontroller.example.mks
+  name: mkspipelines.mkscontroller.example.mks
 spec:
   group: mkscontroller.example.mks
   versions:
@@ -26,6 +26,6 @@ spec:
                   type: string  
 
   names:
-    kind: MksTask
-    plural: mkstasks
+    kind: MksPipeline
+    plural: mkspipelines
   scope: Namespaced

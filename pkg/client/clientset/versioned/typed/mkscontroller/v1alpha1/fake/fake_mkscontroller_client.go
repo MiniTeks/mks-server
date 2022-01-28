@@ -28,8 +28,8 @@ type FakeMkscontrollerV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeMkscontrollerV1alpha1) MksTasks(namespace string) v1alpha1.MksTaskInterface {
-	return &FakeMksTasks{c, namespace}
+func (c *FakeMkscontrollerV1alpha1) MksPipelines(namespace string) v1alpha1.MksPipelineInterface {
+	return &FakeMksPipelines{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

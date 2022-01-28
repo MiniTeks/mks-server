@@ -28,7 +28,7 @@ import (
 
 type MkscontrollerV1alpha1Interface interface {
 	RESTClient() rest.Interface
-	MksTasksGetter
+	MksPipelinesGetter
 }
 
 // MkscontrollerV1alpha1Client is used to interact with features provided by the mkscontroller.example.mks group.
@@ -36,8 +36,8 @@ type MkscontrollerV1alpha1Client struct {
 	restClient rest.Interface
 }
 
-func (c *MkscontrollerV1alpha1Client) MksTasks(namespace string) MksTaskInterface {
-	return newMksTasks(c, namespace)
+func (c *MkscontrollerV1alpha1Client) MksPipelines(namespace string) MksPipelineInterface {
+	return newMksPipelines(c, namespace)
 }
 
 // NewForConfig creates a new MkscontrollerV1alpha1Client for the given config.
