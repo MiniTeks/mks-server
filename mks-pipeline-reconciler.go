@@ -23,6 +23,7 @@ func (c *controller) run(ch <-chan struct{}) {
 	<-ch
 }
 
+// If processItem returns false then worker() would return and then wait.Until again calls worker() after 1sec
 func (c *controller) worker() {
 	for c.processItem() {
 
@@ -34,6 +35,7 @@ func (c *controller) processItem() bool {
 	if shutdown {
 		return false
 	}
+	// To make sure the particular item is not processed again
 	defer c.queue.Forget(item)
 	return true
 }

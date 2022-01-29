@@ -4,13 +4,14 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"time"
+
 	"github.com/MiniTeks/mks-server/pkg/apis/mkscontroller/v1alpha1"
 	examplecomclientset "github.com/MiniTeks/mks-server/pkg/client/clientset/versioned"
+	informers "github.com/MiniTeks/mks-server/pkg/client/informers/externalversions"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog/v2"
-	"time"
-	informers "github.com/MiniTeks/mks-server/pkg/client/informers/externalversions"
 )
 
 var (
@@ -43,10 +44,7 @@ func main() {
 		klog.Fatalf("Error creating all resources: %v", err)
 	}
 	fmt.Println(crt)
-	
-	
 
-	
 	list, err := exampleClient.MkscontrollerV1alpha1().MksPipelines("default").Get(context.TODO(), "hello", v1.GetOptions{})
 	if err != nil {
 		klog.Fatalf("Error listing all databases: %v", err)
@@ -63,9 +61,20 @@ func main() {
 	}
 
 	ch := make(chan struct{})
+
+	/* creating new instance of NewSharedInformerFactory instead of Informer to reduce the load on apiserver
+	   in case on n GVRs
+	   if resources of only a particular namespace is required then NewFilteredSharedInformerFactory can be
+	   used
+	*/
+	// sync in memory cache with kubernetes cluster state in every 10 min
 	informers := informers.NewSharedInformerFactory(exampleClient, 10*time.Minute)
 	c := newController(*exampleClient, informers.Mkscontroller().V1alpha1().MksPipelines())
+
+	// starting informers
 	informers.Start(ch)
+
+	// starting controller by calling run() and passing channel ch
 	c.run(ch)
 	fmt.Println(informers)
 
