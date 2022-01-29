@@ -9,6 +9,8 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog/v2"
+	"time"
+	informers "github.com/MiniTeks/mks-server/pkg/client/informers/externalversions"
 )
 
 var (
@@ -59,5 +61,12 @@ func main() {
 		fmt.Println(name)
 
 	}
+
+	ch := make(chan struct{})
+	informers := informers.NewSharedInformerFactory(exampleClient, 10*time.Minute)
+	c := newController(*exampleClient, informers.Mkscontroller().V1alpha1().MksPipelines())
+	informers.Start(ch)
+	c.run(ch)
+	fmt.Println(informers)
 
 }
