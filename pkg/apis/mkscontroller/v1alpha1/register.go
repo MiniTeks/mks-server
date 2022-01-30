@@ -25,8 +25,11 @@ var (
 
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
-	&MksPipelineRun{},
-	&MksPipelineRunList{},)
+	  &MksPipelineRun{},
+	  &MksPipelineRunList{},
+	  &MksTask{},
+		&MksTaskList{},
+	)
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil
 }
