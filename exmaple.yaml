@@ -1,7 +1,7 @@
 apiVersion: mkscontroller.example.mks/v1alpha1
 kind: MksTaskRun
 metadata:
-  name: test2
+  name: test2-go-8
 spec:
   taskRef:
-    name: simple-task
+    name: hello
