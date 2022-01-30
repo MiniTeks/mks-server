@@ -18,10 +18,10 @@ limitations under the License.
 
 package v1alpha1
 
-// MksTaskListerExpansion allows custom methods to be added to
-// MksTaskLister.
-type MksTaskListerExpansion interface{}
+// MksPipelineRunListerExpansion allows custom methods to be added to
+// MksPipelineRunLister.
+type MksPipelineRunListerExpansion interface{}
 
-// MksTaskNamespaceListerExpansion allows custom methods to be added to
-// MksTaskNamespaceLister.
-type MksTaskNamespaceListerExpansion interface{}
+// MksPipelineRunNamespaceListerExpansion allows custom methods to be added to
+// MksPipelineRunNamespaceLister.
+type MksPipelineRunNamespaceListerExpansion interface{}

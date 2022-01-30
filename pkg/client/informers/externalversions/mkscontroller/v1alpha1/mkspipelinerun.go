@@ -32,59 +32,59 @@ import (
 	cache "k8s.io/client-go/tools/cache"
 )
 
-// MksTaskInformer provides access to a shared informer and lister for
-// MksTasks.
-type MksTaskInformer interface {
+// MksPipelineRunInformer provides access to a shared informer and lister for
+// MksPipelineRuns.
+type MksPipelineRunInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1alpha1.MksTaskLister
+	Lister() v1alpha1.MksPipelineRunLister
 }
 
-type mksTaskInformer struct {
+type mksPipelineRunInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
 	namespace        string
 }
 
-// NewMksTaskInformer constructs a new informer for MksTask type.
+// NewMksPipelineRunInformer constructs a new informer for MksPipelineRun type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewMksTaskInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredMksTaskInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewMksPipelineRunInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredMksPipelineRunInformer(client, namespace, resyncPeriod, indexers, nil)
 }
 
-// NewFilteredMksTaskInformer constructs a new informer for MksTask type.
+// NewFilteredMksPipelineRunInformer constructs a new informer for MksPipelineRun type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredMksTaskInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredMksPipelineRunInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.MkscontrollerV1alpha1().MksTasks(namespace).List(context.TODO(), options)
+				return client.MkscontrollerV1alpha1().MksPipelineRuns(namespace).List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.MkscontrollerV1alpha1().MksTasks(namespace).Watch(context.TODO(), options)
+				return client.MkscontrollerV1alpha1().MksPipelineRuns(namespace).Watch(context.TODO(), options)
 			},
 		},
-		&mkscontrollerv1alpha1.MksTask{},
+		&mkscontrollerv1alpha1.MksPipelineRun{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func (f *mksTaskInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredMksTaskInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+func (f *mksPipelineRunInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredMksPipelineRunInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *mksTaskInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&mkscontrollerv1alpha1.MksTask{}, f.defaultInformer)
+func (f *mksPipelineRunInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&mkscontrollerv1alpha1.MksPipelineRun{}, f.defaultInformer)
 }
 
-func (f *mksTaskInformer) Lister() v1alpha1.MksTaskLister {
-	return v1alpha1.NewMksTaskLister(f.Informer().GetIndexer())
+func (f *mksPipelineRunInformer) Lister() v1alpha1.MksPipelineRunLister {
+	return v1alpha1.NewMksPipelineRunLister(f.Informer().GetIndexer())
 }

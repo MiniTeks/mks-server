@@ -7,25 +7,24 @@ import (
 // +genclient
 // +genreconciler
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-type MksTask struct {
+type MksPipelineRun struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec MksTaskSpec `json:"spec"`
+	Spec MksPipelineRunSpec `json:"spec"`
 }
 
-type MksTaskSpec struct {
+type MksPipelineRunSpec struct {
 	Name    string `json:"name"`
 	Image   string `json:"image"`
 	Command string `json:"command"`
 	Args    string `json:"args"`
 }
 
-
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-type MksTaskList struct {
+type MksPipelineRunList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`
 
-	Items []MksTask `json:"items"`
+	Items []MksPipelineRun `json:"items"`
 }
