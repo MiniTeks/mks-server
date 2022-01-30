@@ -25,6 +25,8 @@ var (
 
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
+		&MksTaskRun{},
+		&MksTaskRunList{},
 	  &MksPipelineRun{},
 	  &MksPipelineRunList{},
 	  &MksTask{},
