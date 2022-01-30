@@ -25,3 +25,11 @@ type MksTaskListerExpansion interface{}
 // MksTaskNamespaceListerExpansion allows custom methods to be added to
 // MksTaskNamespaceLister.
 type MksTaskNamespaceListerExpansion interface{}
+
+// MksTaskRunListerExpansion allows custom methods to be added to
+// MksTaskRunLister.
+type MksTaskRunListerExpansion interface{}
+
+// MksTaskRunNamespaceListerExpansion allows custom methods to be added to
+// MksTaskRunNamespaceLister.
+type MksTaskRunNamespaceListerExpansion interface{}

@@ -36,12 +36,12 @@ ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
   "mkscontroller:v1alpha1" \
   --go-header-file ${REPO_ROOT_DIR}/hack/boilerplate/boilerplate.go.txt
 
-group "Knative Codegen"
+# group "Knative Codegen"
 
 # # Knative Injection
 # ${KNATIVE_CODEGEN_PKG}/hack/generate-knative.sh "injection" \
-#   knative.dev/sample-controller/pkg/client knative.dev/sample-controller/pkg/apis \
-#   "samples:v1alpha1" \
+#   github.com/MiniTeks/mks-server/pkg/client github.com/MiniTeks/mks-server/pkg/apis \
+#   "mkscontroller:v1alpha1" \
 #   --go-header-file ${REPO_ROOT_DIR}/hack/boilerplate/boilerplate.go.txt
 
 # group "Update deps post-codegen"

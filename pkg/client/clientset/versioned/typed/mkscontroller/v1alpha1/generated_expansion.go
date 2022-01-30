@@ -19,3 +19,5 @@ limitations under the License.
 package v1alpha1
 
 type MksTaskExpansion interface{}
+
+type MksTaskRunExpansion interface{}

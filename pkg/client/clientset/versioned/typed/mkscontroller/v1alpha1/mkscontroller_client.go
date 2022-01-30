@@ -29,6 +29,7 @@ import (
 type MkscontrollerV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	MksTasksGetter
+	MksTaskRunsGetter
 }
 
 // MkscontrollerV1alpha1Client is used to interact with features provided by the mkscontroller.example.mks group.
@@ -38,6 +39,10 @@ type MkscontrollerV1alpha1Client struct {
 
 func (c *MkscontrollerV1alpha1Client) MksTasks(namespace string) MksTaskInterface {
 	return newMksTasks(c, namespace)
+}
+
+func (c *MkscontrollerV1alpha1Client) MksTaskRuns(namespace string) MksTaskRunInterface {
+	return newMksTaskRuns(c, namespace)
 }
 
 // NewForConfig creates a new MkscontrollerV1alpha1Client for the given config.

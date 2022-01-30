@@ -32,6 +32,10 @@ func (c *FakeMkscontrollerV1alpha1) MksTasks(namespace string) v1alpha1.MksTaskI
 	return &FakeMksTasks{c, namespace}
 }
 
+func (c *FakeMkscontrollerV1alpha1) MksTaskRuns(namespace string) v1alpha1.MksTaskRunInterface {
+	return &FakeMksTaskRuns{c, namespace}
+}
+
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
 func (c *FakeMkscontrollerV1alpha1) RESTClient() rest.Interface {

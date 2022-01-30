@@ -26,6 +26,8 @@ import (
 type Interface interface {
 	// MksTasks returns a MksTaskInformer.
 	MksTasks() MksTaskInformer
+	// MksTaskRuns returns a MksTaskRunInformer.
+	MksTaskRuns() MksTaskRunInformer
 }
 
 type version struct {
@@ -42,4 +44,9 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 // MksTasks returns a MksTaskInformer.
 func (v *version) MksTasks() MksTaskInformer {
 	return &mksTaskInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// MksTaskRuns returns a MksTaskRunInformer.
+func (v *version) MksTaskRuns() MksTaskRunInformer {
+	return &mksTaskRunInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
