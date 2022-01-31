@@ -1,0 +1,14 @@
+apiVersion: mkscontroller.example.mks/v1alpha1
+kind: MksTask
+metadata:
+  creationTimestamp: "2022-01-28T13:32:05Z"
+  generation: 1
+  name: hello2
+  namespace: default
+  resourceVersion: "414325"
+  uid: fe563285-70ce-44d6-b0a5-65bb571c5aa7
+spec:
+  args: args
+  command: ls
+  image: image
+  name: hello
