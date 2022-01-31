@@ -63,55 +63,8 @@ func (c *controller) processItem() bool {
 		return false
 	}
 	defer c.queue.Forget(item)
-	// key, err := cache.MetaNamespaceKeyFunc(item)
-	// if err != nil {
-	// 	fmt.Printf("getting key from cahce %s\n", err.Error())
-	// }
-
-	// ns, name, err := cache.SplitMetaNamespaceKey(key)
-	// if err != nil {
-	// 	fmt.Printf("splitting key into namespace and name %s\n", err.Error())
-	// 	return false
-	// }
-	// fmt.Printf("\nNeeds to   be printed\n")
-	// fmt.Println("Key" + key)
-	// fmt.Println("Namespace" + ns)
-	// fmt.Println("Name" + name)
-	// ctx := context.Background()
-	// _, err = c.clientset.MkscontrollerV1alpha1().MksTasks(ns).Get(ctx, name, metav1.GetOptions{})
-
-	// if apierrors.IsNotFound(err) {
-	// 	fmt.Printf("handle delete event for mksTask %s\n", name)
-	// }
-	// err = c.syncMksTask(ns, name)
-	// if err != nil {
-	// 	fmt.Printf("syncing mksTasks %s\n", err.Error())
-	// 	return false
-	// }
 	return true
 }
-
-// func (c *controller) syncMksTask(ns, name string) error {
-// 	// ctx := context.Background()
-
-// 	mksTask, err := c.mksTaskLister.MksTasks(ns).Get(name)
-// 	if err != nil {
-// 		fmt.Printf("getting mksTasks from lister %s\n", err.Error())
-// 	}
-// 	// // create tekton task
-// 	// task := v1beta1.Task{
-// 	// 	ObjectMeta: metav1.ObjectMeta{
-// 	// 		Name:      mksTask.Name,
-// 	// 		Namespace: ns,
-// 	// 	},
-// 	// 	Spec: pipeline.TaskSpec{},
-// 	// }
-// 	fmt.Println(task)
-// 	object, _ := runtime.DefaultUnstructuredConverter.ToUnstructured(task)
-// 	actions.Create(TrGroupResource, cs, object.(*v1alpha1.MksTask), ns, metav1.CreateOptions{})
-// 	return err
-
-// }
 
 func (c *controller) handleAdd(obj interface{}) {
 	fmt.Println("add was called")
@@ -122,13 +75,12 @@ func (c *controller) handleAdd(obj interface{}) {
 		fmt.Errorf("Cannot get tekton client", err)
 	}
 	Create(cs, obj.(*v1alpha1.MksTask), metav1.CreateOptions{}, "default")
-
 	c.queue.Add(obj)
 }
 
 func (c *controller) handleUpdate(old, obj interface{}) {
 	fmt.Println("update was called")
-	fmt.Println(obj)
+	// fmt.Println(obj)
 	c.queue.Add(obj)
 }
 
