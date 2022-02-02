@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mks-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mks-db
+  template:
+    metadata:
+      labels:
+        app: mks-db
+    spec:
+      containers:
+      - name: redis
+        image: redis
+        imagePullPolicy: IfNotPresent
+        args: ["--requirepass", "$(REDIS_PASS)"]
+        env:
+          - name: MASTER
+            value: "true"
+          - name: REDIS_PASS
+            valueFrom:
+              secretKeyRef:
+                name: db-secret
+                key: redis-pass
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 6379
+          name: redis
+        volumeMounts:
+          - mountPath: /data
+            name: redis-data
+      volumes:
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: redis-data
+
+--- 
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-data
+spec:
+  resources:
+    requests:
+      storage: 100Mi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
