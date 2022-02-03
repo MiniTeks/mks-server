@@ -3,6 +3,7 @@ module github.com/MiniTeks/mks-server
 go 1.17
 
 require (
+	github.com/go-redis/redis v6.15.8+incompatible
 	github.com/tektoncd/pipeline v0.32.1
 	k8s.io/api v0.23.3
 	k8s.io/apimachinery v0.23.3
@@ -22,7 +23,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blendle/zapdriver v1.3.1 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
-	github.com/cespare/xxhash/v2 v2.1.1 // indirect
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful v2.15.0+incompatible // indirect
 	github.com/evanphx/json-patch v4.12.0+incompatible // indirect

@@ -2,18 +2,23 @@ package mkstask
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/MiniTeks/mks-server/pkg/apis/mkscontroller/v1alpha1"
 	examplecomclientset "github.com/MiniTeks/mks-server/pkg/client/clientset/versioned"
 	appsinformers "github.com/MiniTeks/mks-server/pkg/client/informers/externalversions/mkscontroller/v1alpha1"
 	appslisters "github.com/MiniTeks/mks-server/pkg/client/listers/mkscontroller/v1alpha1"
+	"github.com/MiniTeks/mks-server/pkg/db"
 	"github.com/MiniTeks/mks-server/pkg/tconfig"
+	"github.com/go-redis/redis"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 )
+
+var rClient *redis.Client
 
 type controller struct {
 	clientset          examplecomclientset.Clientset
@@ -22,7 +27,8 @@ type controller struct {
 	queue              workqueue.RateLimitingInterface
 }
 
-func NewController(clientset examplecomclientset.Clientset, mksTaskInformer appsinformers.MksTaskInformer) *controller {
+func NewController(clientset examplecomclientset.Clientset, mksTaskInformer appsinformers.MksTaskInformer, redisClient *redis.Client) *controller {
+	rClient = redisClient
 	c := &controller{
 		clientset:          clientset,
 		mksTaskLister:      mksTaskInformer.Lister(),
@@ -70,21 +76,33 @@ func (c *controller) handleAdd(obj interface{}) {
 	fmt.Println("add was called")
 	fmt.Println(obj)
 	tp := &tconfig.TektonParam{}
-	cs, err := tp.Client()
-	if err != nil {
-		fmt.Errorf("Cannot get tekton client: %v", err)
+	cs, er := tp.Client()
+	if er != nil {
+		log.Fatalf("Cannot get tekton client: %s", er.Error())
+		return
 	}
-	Create(cs, obj.(*v1alpha1.MksTask), metav1.CreateOptions{}, "default")
+	tsk, err := Create(cs, obj.(*v1alpha1.MksTask), metav1.CreateOptions{}, "default")
+	if err != nil {
+		db.Increment(rClient, "mksTaskfailed")
+		return
+	} else {
+		db.Increment(rClient, "mksTaskcreated")
+		db.Increment(rClient, "mksTaskactive")
+		fmt.Println("tekton task created")
+		fmt.Printf("uid %s", tsk.UID)
+	}
+
 	c.queue.Add(obj)
 }
 
 func (c *controller) handleUpdate(old, obj interface{}) {
 	fmt.Println("update was called")
-	// fmt.Println(obj)
 	c.queue.Add(obj)
 }
 
 func (c *controller) handleDel(obj interface{}) {
 	fmt.Println("del was called")
+	db.Decrement(rClient, "mksTaskactive")
+	db.Increment(rClient, "mksTaskdeleted")
 	c.queue.Add(obj)
 }
