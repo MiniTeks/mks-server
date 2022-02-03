@@ -1,0 +1,7 @@
+apiVersion: mkscontroller.example.mks/v1alpha1
+kind: MksPipelineRun
+metadata:
+  name: test-pipelinerun
+spec:
+  pipelineRef:
+    name: hello
