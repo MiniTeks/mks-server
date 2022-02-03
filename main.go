@@ -5,30 +5,36 @@ import (
 	"fmt"
 	"time"
 
-	clientset "github.com/MiniTeks/mks-server/pkg/client/clientset/versioned"
-	mksinformer "github.com/MiniTeks/mks-server/pkg/client/informers/externalversions"
-	mkstrcontroller "github.com/MiniTeks/mks-server/pkg/controllers/mkstaskrun"
+	mksclientset "github.com/MiniTeks/mks-server/pkg/client/clientset/versioned"
+	informers "github.com/MiniTeks/mks-server/pkg/client/informers/externalversions"
+	mprcontroller "github.com/MiniTeks/mks-server/pkg/controllers/mkspipelinerun"
+	mtcontroller "github.com/MiniTeks/mks-server/pkg/controllers/mkstask"
+	mtrcontroller "github.com/MiniTeks/mks-server/pkg/controllers/mkstaskrun"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/klog/v2"
-	"knative.dev/pkg/signals"
+	klog "k8s.io/klog/v2"
 )
 
 var (
-	kubeconfig = flag.String("kubeconfig", "", "Path to kubeconfig")
-	masterUrl  = flag.String("master", "", "API server URL")
+	kuberconfig = flag.String("kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
+	master      = flag.String("master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 )
 
 func main() {
+
 	fmt.Println("Hello mks-server")
 
 	klog.InitFlags(nil)
 	flag.Parse()
 
-	stopC := signals.SetupSignalHandler()
-	cfg, err := clientcmd.BuildConfigFromFlags(*masterUrl, *kubeconfig)
+	cfg, err := clientcmd.BuildConfigFromFlags(*master, *kuberconfig)
 	if err != nil {
-		klog.Fatalf("Error getting kubeConfig: %v", err)
+		klog.Fatalf("Error building kubeconfig: %v", err)
+	}
+
+	mksClient, err := mksclientset.NewForConfig(cfg)
+	if err != nil {
+		klog.Fatalf("Error building mks client: %v", err)
 	}
 
 	kubeClient, err := kubernetes.NewForConfig(cfg)
@@ -36,16 +42,25 @@ func main() {
 		klog.Fatalf("Error getting kube client: %v", err)
 	}
 
-	mksClient, err := clientset.NewForConfig(cfg)
-	if err != nil {
-		klog.Fatalf("Error getting mks client: %v", err)
-	}
+	ch := make(chan struct{})
 
-	informerfactory := mksinformer.NewSharedInformerFactory(mksClient, 10*time.Minute)
+	/* creating new instance of NewSharedInformerFactory instead of Informer to reduce the load on apiserver
+	   in case on n GVRs
+	   if resources of only a particular namespace is required then NewFilteredSharedInformerFactory can be
+	   used
+	*/
+	// sync in memory cache with kubernetes cluster state in every 10 min
+	informers := informers.NewSharedInformerFactory(mksClient, 10*time.Minute)
+	mprc := mprcontroller.NewController(kubeClient, mksClient, informers.Mkscontroller().V1alpha1().MksPipelineRuns())
+	mtc := mtcontroller.NewController(*mksClient, informers.Mkscontroller().V1alpha1().MksTasks())
+	mtrc := mtrcontroller.NewController(kubeClient, mksClient, informers.Mkscontroller().V1alpha1().MksTaskRuns())
 
-	ctrl := mkstrcontroller.NewController(kubeClient, mksClient, informerfactory.Mkscontroller().V1alpha1().MksTaskRuns())
+	// starting informers
+	informers.Start(ch)
 
-	informerfactory.Start(stopC)
-
-	ctrl.Run(stopC)
+	// starting controller by calling run() and passing channel ch
+	mprc.Run(ch)
+	mtc.Run(ch)
+	mtrc.Run(ch)
+	fmt.Println(informers)
 }
