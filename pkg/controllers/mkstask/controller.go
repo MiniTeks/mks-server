@@ -72,7 +72,7 @@ func (c *controller) handleAdd(obj interface{}) {
 	tp := &tconfig.TektonParam{}
 	cs, err := tp.Client()
 	if err != nil {
-		fmt.Errorf("Cannot get tekton client", err)
+		fmt.Errorf("Cannot get tekton client: %v", err)
 	}
 	Create(cs, obj.(*v1alpha1.MksTask), metav1.CreateOptions{}, "default")
 	c.queue.Add(obj)
