@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	examplecomclientset "github.com/MiniTeks/mks-server/pkg/client/clientset/versioned"
+	mksclientset "github.com/MiniTeks/mks-server/pkg/client/clientset/versioned"
 	informers "github.com/MiniTeks/mks-server/pkg/client/informers/externalversions"
-	con "github.com/MiniTeks/mks-server/pkg/controllers/mkspipelinerun"
+	mprcontroller "github.com/MiniTeks/mks-server/pkg/controllers/mkspipelinerun"
+	mtcontroller "github.com/MiniTeks/mks-server/pkg/controllers/mkstask"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog/v2"
@@ -19,6 +20,8 @@ var (
 )
 
 func main() {
+
+	fmt.Println("Hello mks-server")
 	klog.InitFlags(nil)
 	flag.Parse()
 
@@ -27,7 +30,7 @@ func main() {
 		klog.Fatalf("Error building kubeconfig: %v", err)
 	}
 
-	exampleClient, err := examplecomclientset.NewForConfig(cfg)
+	mksClient, err := mksclientset.NewForConfig(cfg)
 	if err != nil {
 		klog.Fatalf("Error building example clientset: %v", err)
 	}
@@ -45,14 +48,14 @@ func main() {
 	   used
 	*/
 	// sync in memory cache with kubernetes cluster state in every 10 min
-	informers := informers.NewSharedInformerFactory(exampleClient, 10*time.Minute)
-	c := con.NewController(kubeClient, exampleClient, informers.Mkscontroller().V1alpha1().MksPipelineRuns())
-
+	informers := informers.NewSharedInformerFactory(mksClient, 10*time.Minute)
+	mprc := mprcontroller.NewController(kubeClient, mksClient, informers.Mkscontroller().V1alpha1().MksPipelineRuns())
+	mtc := mtcontroller.NewController(*mksClient, informers.Mkscontroller().V1alpha1().MksTasks())
 	// starting informers
 	informers.Start(ch)
 
 	// starting controller by calling run() and passing channel ch
-	c.Run(ch)
+	mprc.Run(ch)
+	mtc.Run(ch)
 	fmt.Println(informers)
-
 }
