@@ -15,7 +15,7 @@ It is an API server which exposes a few APIs that users can use to create the re
 
 - Clone the repository using:
 ```bash
-git clone git@github.com:albertplaya/tinder-clone.git
+git clone https://github.com/MiniTeks/mks-server.git
 ```
 - Run the below commands:
 ```bash
@@ -28,17 +28,24 @@ go mod vendor
 go build -o mks-server
 ```
 - Make sure minikube cluster is running and tekton pipeline installed
-- Apply Custom Resource Definition present in config/ according to custom resource you want create
+- Apply Custom Resource Definition present in config/ according to custom resource(s) you want create
 ```bash
-kubectl apply -f config/<crd-file-name>.yaml
+kubectl apply -f config/mksCRDs/
 ```
+
+- Running the redis-database
+```bash
+kubectl apply -f k8s/ \
+kubectl port-forward <your redis-db pod, e.g-mks-db-6f544776bf-lsp2r > 6379:6379
+```
+
 - Run the executable using:
 ```bash
 ./mks-server -kubeconfig=$HOME/.kube/config
 ```
 - For checking create custom resource by applying custom-resource file
 ```bash
-kubectl apply -f config/<cr-example>.yaml
+kubectl apply -f config/mksResourceExample/<cr-example>.yaml
 ```
 
 
