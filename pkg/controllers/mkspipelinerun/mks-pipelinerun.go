@@ -5,6 +5,7 @@ import (
 
 	"github.com/MiniTeks/mks-server/pkg/actions"
 	"github.com/MiniTeks/mks-server/pkg/apis/mkscontroller/v1alpha1"
+	"github.com/MiniTeks/mks-server/pkg/db"
 	"github.com/MiniTeks/mks-server/pkg/tconfig"
 	prbeta "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -59,9 +60,17 @@ func (c *controller) handleAdd(obj interface{}) {
 	if err != nil {
 		fmt.Errorf("Cannot get client", err)
 	}
-	Create(cs, obj.(*v1alpha1.MksPipelineRun), metav1.CreateOptions{}, "default")
+	pr, err := Create(cs, obj.(*v1alpha1.MksPipelineRun), metav1.CreateOptions{}, "default")
+	if err != nil {
+		db.Increment(rClient, "mksPipelineRunfailed")
+		return
+	} else {
+		db.Increment(rClient, "mksPipelineRuncreated")
+		fmt.Println("PipelineRun created")
+		fmt.Printf("uid %s", pr.UID)
+	}
 
-	//c.queue.Add(obj)
+	c.queue.Add(obj)
 }
 
 // Update method of controller for informer function: UpdateFunc
@@ -74,5 +83,6 @@ func (c *controller) handleUpdate(old, new interface{}) {
 // Delete method of controller for informer function: DeleteFunc
 func (c *controller) handleDelete(obj interface{}) {
 	fmt.Println("del was called")
+	db.Increment(rClient, "mksPipelineRundeleted")
 	c.queue.Add(obj)
 }

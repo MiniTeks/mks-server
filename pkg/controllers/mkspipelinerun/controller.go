@@ -10,6 +10,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
+
+	"github.com/go-redis/redis/v8"
 )
 
 type controller struct {
@@ -19,8 +21,11 @@ type controller struct {
 	mksPipelineCacheSynced cache.InformerSynced
 }
 
+var rClient *redis.Client
+
 // Creates a new controller and returns
-func NewController(kubectlst kubernetes.Interface, clientset clientset.Interface, mksPipelineRunInformer appsinformers.MksPipelineRunInformer) *controller {
+func NewController(kubectlst kubernetes.Interface, clientset clientset.Interface, mksPipelineRunInformer appsinformers.MksPipelineRunInformer, redisClient *redis.Client) *controller {
+	rClient = redisClient
 	c := &controller{
 		mksclientset:           clientset,
 		kubeclientset:          kubectlst,

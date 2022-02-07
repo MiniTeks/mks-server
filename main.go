@@ -61,7 +61,7 @@ func main() {
 	// sync in memory cache with kubernetes cluster state in every 10 min
 	ch := make(chan struct{})
 	informers := informers.NewSharedInformerFactory(mksClient, 10*time.Minute)
-	mprc := mprcontroller.NewController(kubeClient, mksClient, informers.Mkscontroller().V1alpha1().MksPipelineRuns())
+	mprc := mprcontroller.NewController(kubeClient, mksClient, informers.Mkscontroller().V1alpha1().MksPipelineRuns(), redisClient)
 	mtc := mtcontroller.NewController(*mksClient, informers.Mkscontroller().V1alpha1().MksTasks(), redisClient)
 	mtrc := mtrcontroller.NewController(kubeClient, mksClient, informers.Mkscontroller().V1alpha1().MksTaskRuns())
 
