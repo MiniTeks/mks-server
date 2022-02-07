@@ -10,6 +10,7 @@ import (
 	mprcontroller "github.com/MiniTeks/mks-server/pkg/controllers/mkspipelinerun"
 	mtcontroller "github.com/MiniTeks/mks-server/pkg/controllers/mkstask"
 	mtrcontroller "github.com/MiniTeks/mks-server/pkg/controllers/mkstaskrun"
+	"github.com/MiniTeks/mks-server/pkg/db"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	klog "k8s.io/klog/v2"
@@ -18,6 +19,8 @@ import (
 var (
 	kuberconfig = flag.String("kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	master      = flag.String("master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+	dbAddr      = flag.String("addr", "127.0.0.1:6379", "The address of the redis server")
+	password    = flag.String("password", "12345", "The password of the Kubernetes API server")
 )
 
 func main() {
@@ -42,7 +45,13 @@ func main() {
 		klog.Fatalf("Error getting kube client: %v", err)
 	}
 
-	ch := make(chan struct{})
+	// redis-db client
+	cred := db.RClient{
+		Addr: *dbAddr,
+		Pass: *password,
+		Db:   0,
+	}
+	redisClient := db.GetRedisClient(&cred)
 
 	/* creating new instance of NewSharedInformerFactory instead of Informer to reduce the load on apiserver
 	   in case on n GVRs
@@ -50,12 +59,12 @@ func main() {
 	   used
 	*/
 	// sync in memory cache with kubernetes cluster state in every 10 min
+	ch := make(chan struct{})
 	informers := informers.NewSharedInformerFactory(mksClient, 10*time.Minute)
 	mprc := mprcontroller.NewController(kubeClient, mksClient, informers.Mkscontroller().V1alpha1().MksPipelineRuns())
-	mtc := mtcontroller.NewController(*mksClient, informers.Mkscontroller().V1alpha1().MksTasks())
+	mtc := mtcontroller.NewController(*mksClient, informers.Mkscontroller().V1alpha1().MksTasks(), redisClient)
 	mtrc := mtrcontroller.NewController(kubeClient, mksClient, informers.Mkscontroller().V1alpha1().MksTaskRuns())
 
-	// starting informers
 	informers.Start(ch)
 
 	// starting controller by calling run() and passing channel ch
