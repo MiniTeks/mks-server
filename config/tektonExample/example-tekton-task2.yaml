@@ -1,14 +1,14 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: hello
+  name: hello2
   namespace: default
 spec:
   steps:
   - args:
-    - args
+    - -l
     command:
     - ls
-    image: image
-    name: hello
+    image: ubuntu
+    name: hello2
     resources: {}
