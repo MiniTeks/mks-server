@@ -11,7 +11,7 @@ import (
 	appslisters "github.com/MiniTeks/mks-server/pkg/client/listers/mkscontroller/v1alpha1"
 	"github.com/MiniTeks/mks-server/pkg/db"
 	"github.com/MiniTeks/mks-server/pkg/tconfig"
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
@@ -87,7 +87,6 @@ func (c *controller) handleAdd(obj interface{}) {
 		return
 	} else {
 		db.Increment(rClient, "mksTaskcreated")
-		db.Increment(rClient, "mksTaskactive")
 		fmt.Println("tekton task created")
 		fmt.Printf("uid %s", tsk.UID)
 	}
@@ -102,7 +101,6 @@ func (c *controller) handleUpdate(old, obj interface{}) {
 
 func (c *controller) handleDel(obj interface{}) {
 	fmt.Println("del was called")
-	db.Decrement(rClient, "mksTaskactive")
 	db.Increment(rClient, "mksTaskdeleted")
 	c.queue.Add(obj)
 }
