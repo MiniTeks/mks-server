@@ -3,6 +3,7 @@ module github.com/MiniTeks/mks-server
 go 1.17
 
 require (
+	github.com/apsdehal/go-logger v0.0.0-20190515212710-b0d6ccfee0e6
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/tektoncd/pipeline v0.32.1
 	k8s.io/api v0.23.3
