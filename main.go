@@ -63,7 +63,7 @@ func main() {
 	informers := informers.NewSharedInformerFactory(mksClient, 10*time.Minute)
 	mprc := mprcontroller.NewController(kubeClient, mksClient, informers.Mkscontroller().V1alpha1().MksPipelineRuns(), redisClient)
 	mtc := mtcontroller.NewController(*mksClient, informers.Mkscontroller().V1alpha1().MksTasks(), redisClient)
-	mtrc := mtrcontroller.NewController(kubeClient, mksClient, informers.Mkscontroller().V1alpha1().MksTaskRuns())
+	mtrc := mtrcontroller.NewController(kubeClient, mksClient, informers.Mkscontroller().V1alpha1().MksTaskRuns(), redisClient)
 
 	informers.Start(ch)
 
