@@ -20,6 +20,7 @@ func Increment(rClient *redis.Client, key string) {
 	Check(rClient, key)
 	rClient.Incr(ctx, key)
 }
+
 func Decrement(rClient *redis.Client, key string) {
 	key = strings.ToUpper(key)
 	Check(rClient, key)
