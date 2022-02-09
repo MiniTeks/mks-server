@@ -19,5 +19,5 @@ func Get(gr schema.GroupVersionResource, clients *tconfig.Client, objname, ns st
 	if err != nil {
 		return nil, err
 	}
-	return obj, err
+	return obj, nil
 }
