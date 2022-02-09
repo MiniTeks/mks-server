@@ -35,13 +35,13 @@ func GetRedisClient(cred *RClient) *redis.Client {
 		DB:       cred.Db,   // use default DB 0
 	})
 	// keys := []string{"mksTaskcreated", "mksTaskdeleted", "mksTaskactive", "mksTaskfailed", "mksTaskRuncreated", "mksTaskRundeleted", "mksTaskRunactive", "mksTaskRunfailed", "mksPipelineRuncreated", "mksPipelineRundeleted", "mksPipelineRunactive", "mksPipelineRunfailed"}
-	// for _, item := range keys {
-	// 	rdb.Set(item, 0, 0)
-	// }
+
 	ping, err := rdb.Ping(ctx).Result()
 	if err != nil {
 		log.Fatal("Couldn't connect to redis-database")
+	} else {
+		fmt.Print(ping, err)
+		fmt.Println("Connected to the redis-db server")
 	}
-	fmt.Print(ping, err)
 	return rdb
 }

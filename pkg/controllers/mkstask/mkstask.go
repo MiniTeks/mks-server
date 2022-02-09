@@ -32,7 +32,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
+<<<<<<< HEAD
 // Group and Version to uniquely identify the Tekton API.
+=======
+>>>>>>> 7786398 (add unit tests for mksTask type)
 var TaskGroupResource = schema.GroupVersionResource{Group: "tekton.dev", Resource: "task"}
 
 // ConvertToTekton converts a mksresource into corresponding Tekton resource
@@ -83,7 +86,11 @@ func Create(cl *tconfig.Client, mt *v1alpha1.MksTask, opt metav1.CreateOptions, 
 
 }
 
+<<<<<<< HEAD
 // Get returns a Tekton object given the name of the resource.
+=======
+// Fetch the resource in v1beta1 struct format
+>>>>>>> 7786398 (add unit tests for mksTask type)
 func Get(c *tconfig.Client, taskname string, opts metav1.GetOptions, ns string) (*v1beta1.Task, error) {
 	unstructuredT, err := actions.Get(TaskGroupResource, c, taskname, ns, opts)
 	if err != nil {
@@ -98,7 +105,10 @@ func Get(c *tconfig.Client, taskname string, opts metav1.GetOptions, ns string) 
 	return task, nil
 }
 
+<<<<<<< HEAD
 // List returns an array of Tekton object for the particular resource.
+=======
+>>>>>>> 7786398 (add unit tests for mksTask type)
 func List(tcl *tconfig.Client, opt metav1.ListOptions, ns string) ([]*v1beta1.Task, error) {
 	objlist, err := actions.List(TaskGroupResource, tcl, ns, opt)
 	if err != nil {
@@ -111,7 +121,10 @@ func List(tcl *tconfig.Client, opt metav1.ListOptions, ns string) ([]*v1beta1.Ta
 	return tasks, nil
 }
 
+<<<<<<< HEAD
 // Delete deletes the Tekton resource given the name of the resource.
+=======
+>>>>>>> 7786398 (add unit tests for mksTask type)
 func Delete(tcl *tconfig.Client, mtrname string, opt metav1.DeleteOptions, ns string) error {
 	if err := actions.Delete(TaskGroupResource, tcl, mtrname, ns, opt); err != nil {
 		return err
@@ -119,12 +132,16 @@ func Delete(tcl *tconfig.Client, mtrname string, opt metav1.DeleteOptions, ns st
 	return nil
 }
 
+<<<<<<< HEAD
 // Update takes a mksresource object, converts it to tekton resource object
 // using ConvertToTekton function and then calls the Update function defined in
 // the actions package to update resource on Kubernetes/OpenShift cluster using
 // Tekton API.
 func Update(cl *tconfig.Client, mt *v1alpha1.MksTask, opt metav1.UpdateOptions,
 	ns string) (*v1beta1.Task, error) {
+=======
+func Update(cl *tconfig.Client, mt *v1alpha1.MksTask, opt metav1.UpdateOptions, ns string) (*v1beta1.Task, error) {
+>>>>>>> 7786398 (add unit tests for mksTask type)
 	tktr := ConvertToTekton(mt)
 
 	object, _ := runtime.DefaultUnstructuredConverter.ToUnstructured(tktr)

@@ -2,7 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mks-server
+  namespace: mks-server
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: mks-server
@@ -11,13 +13,17 @@ spec:
       labels:
         app: mks-server
     spec:
+      serviceAccountName: anyuid
       containers:
       - name: mks-server
-        image: mks-server:latest
-        imagePullPolicy: Never
+        image: ramessesii/mks-server:latest
+        imagePullPolicy: Always
         resources:
           limits:
             memory: "128Mi"
             cpu: "500m"
         ports:
         - containerPort: 4000
+        command: ["/app/mks-server"]
+        args:
+          - -addr=mks-db:6379
