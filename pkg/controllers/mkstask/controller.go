@@ -73,20 +73,19 @@ func (c *controller) processItem() bool {
 }
 
 func (c *controller) handleAdd(obj interface{}) {
-	fmt.Println("add was called")
+	fmt.Println("\n Add handler was called")
 	fmt.Println(obj)
 	tp := &tconfig.TektonParam{}
 	cs, er := tp.Client()
 	if er != nil {
 		log.Fatalf("Cannot get tekton client: %s", er.Error())
-		return
 	}
 	tsk, err := Create(cs, obj.(*v1alpha1.MksTask), metav1.CreateOptions{}, "default")
 	if err != nil {
-		db.Increment(rClient, "mksTaskfailed")
-		return
+		db.Increment(rClient, "MKSTASKFAILED")
+		fmt.Errorf("Couldn't create tekton task: %s", err.Error())
 	} else {
-		db.Increment(rClient, "mksTaskcreated")
+		db.Increment(rClient, "MKSTASKCREATED")
 		fmt.Println("tekton task created")
 		fmt.Printf("uid %s", tsk.UID)
 	}
@@ -95,12 +94,33 @@ func (c *controller) handleAdd(obj interface{}) {
 }
 
 func (c *controller) handleUpdate(old, obj interface{}) {
-	fmt.Println("update was called")
+	fmt.Println("\n Update handler was called")
+	tp := &tconfig.TektonParam{}
+	cs, er := tp.Client()
+	if er != nil {
+		log.Fatalf("Cannot get tekton client: %s", er.Error())
+	}
+	tsk, err := Update(cs, obj.(*v1alpha1.MksTask), metav1.UpdateOptions{}, obj.(*v1alpha1.MksTask).GetObjectMeta().GetNamespace())
+	if err != nil {
+		fmt.Errorf("Couldn't update tekton task: %s", err.Error())
+	} else {
+		fmt.Println("tekton task updated")
+		fmt.Printf("uid %s", tsk.UID)
+	}
 	c.queue.Add(obj)
 }
 
 func (c *controller) handleDel(obj interface{}) {
-	fmt.Println("del was called")
-	db.Increment(rClient, "mksTaskdeleted")
+	fmt.Println("\n Delete handler was called")
+	tp := &tconfig.TektonParam{}
+	cs, er := tp.Client()
+	if er != nil {
+		log.Fatalf("Cannot get tekton client: %s", er.Error())
+	}
+	err := Delete(cs, obj.(*v1alpha1.MksTask).Name, metav1.DeleteOptions{}, "default")
+	if err != nil {
+		fmt.Errorf("Cannot delete tekton task!!: %s", err.Error())
+	}
+	db.Increment(rClient, "MKSTASKDELETED")
 	c.queue.Add(obj)
 }

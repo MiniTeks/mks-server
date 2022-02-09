@@ -38,9 +38,6 @@ func main() {
 			klog.Fatalf("Error building kubeconfig: %v", err)
 		}
 	}
-	if err != nil {
-		klog.Fatalf("Error building kubeconfig: %v", err)
-	}
 
 	mksClient, err := mksclientset.NewForConfig(cfg)
 	if err != nil {
