@@ -13,6 +13,7 @@ import (
 	mtrcontroller "github.com/MiniTeks/mks-server/pkg/controllers/mkstaskrun"
 	"github.com/MiniTeks/mks-server/pkg/db"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	klog "k8s.io/klog/v2"
 )
@@ -31,7 +32,11 @@ func main() {
 	flag.Parse()
 	cfg, err := clientcmd.BuildConfigFromFlags(master, kuberconfig)
 	if err != nil {
-		klog.Fatalf("Error building kubeconfig: %v", err)
+		cfg, err = rest.InClusterConfig()
+		if err != nil {
+			fmt.Printf("error %s, getting inclusterconfig", err.Error())
+			klog.Fatalf("Error building kubeconfig: %v", err)
+		}
 	}
 
 	mksClient, err := mksclientset.NewForConfig(cfg)
