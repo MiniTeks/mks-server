@@ -55,7 +55,8 @@ func (c *Controller) addController(obj interface{}) {
 		fmt.Errorf("Cannot connect to Tekton client: %w", err)
 		return
 	}
-	ttr, err := Create(tcl, obj.(*v1alpha1.MksTaskRun), metav1.CreateOptions{}, "default")
+	var crtobj = obj.(*v1alpha1.MksTaskRun)
+	ttr, err := Create(tcl, crtobj, metav1.CreateOptions{}, crtobj.Namespace)
 	if err != nil {
 		db.Increment(rClient, "mksTaskRunfailed")
 		fmt.Errorf("Cannot create Tekton TaskRun: %w", err)
@@ -73,8 +74,23 @@ func (c *Controller) updateController(oldObj, newObj interface{}) {
 }
 
 func (c *Controller) deleteController(obj interface{}) {
-	fmt.Println("MksTaskRun has been deleted")
-	db.Increment(rClient, "mksTaskRundeleted")
+
+	tp := &tconfig.TektonParam{}
+	tcl, err := tp.Client()
+	if err != nil {
+		fmt.Errorf("Cannot connect to Tekton client: %w", err)
+		return
+	}
+
+	var delobj = obj.(*v1alpha1.MksTaskRun)
+	delerr := Delete(tcl, delobj.Name, metav1.DeleteOptions{}, delobj.Namespace)
+	if delerr != nil {
+		fmt.Errorf("Cannot delete MksTaskRun: %v", delerr)
+		return
+	} else {
+		fmt.Println("MksTaskRun has been deleted")
+		db.Increment(rClient, "mksTaskRundeleted")
+	}
 	c.queue.Add(obj)
 }
 

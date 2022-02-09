@@ -53,3 +53,34 @@ func Create(tcl *tconfig.Client, mtr *v1alpha1.MksTaskRun,
 
 	return taskrun, nil
 }
+
+func Get(tcl *tconfig.Client, mtrname string, opt metav1.GetOptions, ns string) (*v1beta1.TaskRun, error) {
+	obj, err := actions.Get(trGroupResource, tcl, mtrname, ns, opt)
+	if err != nil {
+		return nil, err
+	}
+	var taskrun *v1beta1.TaskRun
+	if err := runtime.DefaultUnstructuredConverter.FromUnstructured(obj.UnstructuredContent(), &taskrun); err != nil {
+		return nil, err
+	}
+	return taskrun, nil
+}
+
+func List(tcl *tconfig.Client, opt metav1.ListOptions, ns string) ([]*v1beta1.TaskRun, error) {
+	objlist, err := actions.List(trGroupResource, tcl, ns, opt)
+	if err != nil {
+		return nil, err
+	}
+	var taskruns []*v1beta1.TaskRun
+	if err := runtime.DefaultUnstructuredConverter.FromUnstructured(objlist.UnstructuredContent(), &taskruns); err != nil {
+		return nil, err
+	}
+	return taskruns, nil
+}
+
+func Delete(tcl *tconfig.Client, mtrname string, opt metav1.DeleteOptions, ns string) error {
+	if err := actions.Delete(trGroupResource, tcl, mtrname, ns, opt); err != nil {
+		return err
+	}
+	return nil
+}
