@@ -61,7 +61,7 @@ func Create(cl *tconfig.Client, mt *v1alpha1.MksTask, opt metav1.CreateOptions, 
 
 // Fetch the resource in v1beta1 struct format
 func Get(c *tconfig.Client, taskname string, opts metav1.GetOptions, ns string) (*v1beta1.Task, error) {
-	unstructuredT, err := actions.Get(TaskGroupResource, c.Dynamic, c.Tekton.Discovery(), taskname, ns, opts)
+	unstructuredT, err := actions.Get(TaskGroupResource, c, taskname, ns, opts)
 	if err != nil {
 		return nil, err
 	}
