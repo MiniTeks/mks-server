@@ -51,6 +51,14 @@ func Create(cl *tconfig.Client, mpr *v1alpha1.MksPipelineRun, opt metav1.CreateO
 
 }
 
+func Delete(cl *tconfig.Client, opt metav1.DeleteOptions, mprName string, ns string) error {
+	err := actions.Delete(prGroupResource, cl, mprName, ns, opt)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // Add method of controller for informer function: AddFunc
 func (c *controller) handleAdd(obj interface{}) {
 	fmt.Println("add was called")
@@ -58,9 +66,9 @@ func (c *controller) handleAdd(obj interface{}) {
 	tp := &tconfig.TektonParam{}
 	cs, err := tp.Client()
 	if err != nil {
-		fmt.Errorf("Cannot get client", err)
+		fmt.Errorf("Cannot get client %v", err)
 	}
-	pr, err := Create(cs, obj.(*v1alpha1.MksPipelineRun), metav1.CreateOptions{}, "default")
+	pr, err := Create(cs, obj.(*v1alpha1.MksPipelineRun), metav1.CreateOptions{}, obj.(*v1alpha1.MksPipelineRun).Namespace)
 	if err != nil {
 		db.Increment(rClient, "mksPipelineRunfailed")
 		return
@@ -82,7 +90,21 @@ func (c *controller) handleUpdate(old, new interface{}) {
 
 // Delete method of controller for informer function: DeleteFunc
 func (c *controller) handleDelete(obj interface{}) {
-	fmt.Println("del was called")
-	db.Increment(rClient, "mksPipelineRundeleted")
+	tp := &tconfig.TektonParam{}
+	cs, err := tp.Client()
+	if err != nil {
+		fmt.Errorf("Cannot connect to Tekton client: %v", err)
+		return
+	}
+	errDel := Delete(cs, metav1.DeleteOptions{}, obj.(*v1alpha1.MksPipelineRun).Name, obj.(*v1alpha1.MksPipelineRun).Namespace)
+	if errDel != nil {
+		fmt.Errorf("Cannot delete MksPipelineRun: %v", errDel)
+		return
+	} else {
+		fmt.Println("MksPipelineRun has been deleted")
+
+		db.Increment(rClient, "mksPipelineRundeleted")
+	}
+
 	c.queue.Add(obj)
 }
