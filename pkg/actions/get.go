@@ -10,14 +10,9 @@ import (
 )
 
 func Get(gr schema.GroupVersionResource, clients *tconfig.Client, objname, ns string, opt metav1.GetOptions) (*unstructured.Unstructured, error) {
-	gvr, err := GetGroupVersionResource(gr, clients.Tekton.Discovery())
+	obj, err := clients.Dynamic.Resource(gr).Namespace(ns).Get(context.Background(), objname, opt)
 	if err != nil {
 		return nil, err
 	}
-
-	obj, err := clients.Dynamic.Resource(*gvr).Namespace(ns).Get(context.Background(), objname, opt)
-	if err != nil {
-		return nil, err
-	}
-	return obj, err
+	return obj, nil
 }

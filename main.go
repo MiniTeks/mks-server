@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"time"
 
 	mksclientset "github.com/MiniTeks/mks-server/pkg/client/clientset/versioned"
@@ -12,27 +13,30 @@ import (
 	mtrcontroller "github.com/MiniTeks/mks-server/pkg/controllers/mkstaskrun"
 	"github.com/MiniTeks/mks-server/pkg/db"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	klog "k8s.io/klog/v2"
 )
 
 var (
-	kuberconfig = flag.String("kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
-	master      = flag.String("master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
-	dbAddr      = flag.String("addr", "127.0.0.1:6379", "The address of the redis server")
-	password    = flag.String("password", "12345", "The password of the Kubernetes API server")
+	kuberconfig string
+	master      string
+	dbAddr      string
+	password    string
 )
 
 func main() {
 
 	fmt.Println("Hello mks-server")
-
 	klog.InitFlags(nil)
 	flag.Parse()
-
-	cfg, err := clientcmd.BuildConfigFromFlags(*master, *kuberconfig)
+	cfg, err := clientcmd.BuildConfigFromFlags(master, kuberconfig)
 	if err != nil {
-		klog.Fatalf("Error building kubeconfig: %v", err)
+		cfg, err = rest.InClusterConfig()
+		if err != nil {
+			fmt.Printf("error %s, getting inclusterconfig", err.Error())
+			klog.Fatalf("Error building kubeconfig: %v", err)
+		}
 	}
 
 	mksClient, err := mksclientset.NewForConfig(cfg)
@@ -47,8 +51,8 @@ func main() {
 
 	// redis-db client
 	cred := db.RClient{
-		Addr: *dbAddr,
-		Pass: *password,
+		Addr: dbAddr,
+		Pass: password,
 		Db:   0,
 	}
 	redisClient := db.GetRedisClient(&cred)
@@ -72,4 +76,16 @@ func main() {
 	mtc.Run(ch)
 	mtrc.Run(ch)
 	fmt.Println(informers)
+}
+
+func init() {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Errorf("Couldn't read user's home directory!!")
+	}
+	home = home + "/.kube/config"
+	flag.StringVar(&kuberconfig, "kubeconfig", home, "Path to a kubeconfig. Only required if out-of-cluster.")
+	flag.StringVar(&master, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+	flag.StringVar(&dbAddr, "addr", "127.0.0.1:6379", "The address of the redis server")
+	flag.StringVar(&password, "password", "12345", "The password of the Kubernetes API server")
 }

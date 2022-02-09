@@ -7,6 +7,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/stretchr/testify v1.7.0
 	github.com/tektoncd/pipeline v0.32.1
+	gotest.tools/v3 v3.1.0
 	k8s.io/api v0.23.3
 	k8s.io/apimachinery v0.23.3
 	k8s.io/client-go v0.23.3
