@@ -3,8 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"time"
-
 	mksclientset "github.com/MiniTeks/mks-server/pkg/client/clientset/versioned"
 	informers "github.com/MiniTeks/mks-server/pkg/client/informers/externalversions"
 	mprcontroller "github.com/MiniTeks/mks-server/pkg/controllers/mkspipelinerun"
@@ -14,6 +12,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	klog "k8s.io/klog/v2"
+	"os"
+	"time"
 )
 
 var (
@@ -29,7 +29,14 @@ func main() {
 
 	klog.InitFlags(nil)
 	flag.Parse()
-
+	if *kuberconfig == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			fmt.Errorf("Cant detect kubeconfig, please add the flag")
+			return
+		}
+		*kuberconfig = home + "/.kube/config"
+	}
 	cfg, err := clientcmd.BuildConfigFromFlags(*master, *kuberconfig)
 	if err != nil {
 		klog.Fatalf("Error building kubeconfig: %v", err)
