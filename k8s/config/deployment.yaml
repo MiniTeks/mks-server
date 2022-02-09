@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mks-server
+spec:
+  selector:
+    matchLabels:
+      app: mks-server
+  template:
+    metadata:
+      labels:
+        app: mks-server
+    spec:
+      containers:
+      - name: mks-server
+        image: mks-server:latest
+        imagePullPolicy: Never
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 4000
