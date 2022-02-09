@@ -33,8 +33,6 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	klog "k8s.io/klog/v2"
-	"os"
-	"time"
 )
 
 var (
@@ -51,10 +49,11 @@ func main() {
 	flag.Parse()
 	cfg, err := clientcmd.BuildConfigFromFlags(master, kuberconfig)
 	if err != nil {
+		fmt.Printf("\nCouldn't build kubeconfig from user's-local: %v\n", err.Error())
+		fmt.Println("Building kubeconfig from InClusterConfig")
 		cfg, err = rest.InClusterConfig()
 		if err != nil {
-			fmt.Printf("error %s, getting inclusterconfig", err.Error())
-			klog.Fatalf("Error building kubeconfig: %v", err)
+			klog.Fatalf("Error %s, getting inclusterconfig", err.Error())
 		}
 	}
 
