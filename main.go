@@ -32,10 +32,10 @@ func main() {
 	flag.Parse()
 	cfg, err := clientcmd.BuildConfigFromFlags(master, kuberconfig)
 	if err != nil {
+		fmt.Printf("Error building kubeconfig: %v", err)
 		cfg, err = rest.InClusterConfig()
 		if err != nil {
-			fmt.Printf("error %s, getting inclusterconfig", err.Error())
-			klog.Fatalf("Error building kubeconfig: %v", err)
+			klog.Fatalf("Error %s, getting inclusterconfig", err.Error())
 		}
 	}
 
