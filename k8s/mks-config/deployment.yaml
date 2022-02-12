@@ -15,22 +15,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM golang:1.17
-
-WORKDIR /build
-ADD . /build/
-
-RUN mkdir /tmp/cache
-RUN CGO_ENABLED=0 GOCACHE=/tmp/cache go build -mod=vendor -v -o /tmp/mks-server .
-
-FROM scratch
-
-LABEL org.opencontainers.image.authors="Avinal Kumar <avinkuma@redhat.com>, Utkarsh Chaurasia <uchauras@redhat.com>, Satyam Bhardwaj <sabhardw@redhat.com>"
-LABEL org.opencontainers.image.source="https://github.com/MiniTeks/mks-server"
-LABEL org.opencontainers.image.version="latest"
-
-WORKDIR /app
-COPY --from=0 /tmp/mks-server /app/mks-server
-COPY ./config /app/config
-
-ENTRYPOINT ["/app/mks-server"]
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mks-server
+  namespace: mks
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mks-server
+  template:
+    metadata:
+      labels:
+        app: mks-server
+    spec:
+      serviceAccountName: mks-server-sa
+      containers:
+      - name: mks-server
+        image: ghcr.io/MiniTeks/mks-server:latest
+        imagePullPolicy: Always
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 4000
+        command:  [ "/app/mks-server"]
+        args:
+          # - -addr=mks-db:6379
+          - -addr=1.2.4.119:6379
