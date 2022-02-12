@@ -15,22 +15,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM golang:1.17
-
-WORKDIR /build
-ADD . /build/
-
-RUN mkdir /tmp/cache
-RUN CGO_ENABLED=0 GOCACHE=/tmp/cache go build -mod=vendor -v -o /tmp/mks-server .
-
-FROM scratch
-
-LABEL org.opencontainers.image.authors="Avinal Kumar <avinkuma@redhat.com>, Utkarsh Chaurasia <uchauras@redhat.com>, Satyam Bhardwaj <sabhardw@redhat.com>"
-LABEL org.opencontainers.image.source="https://github.com/MiniTeks/mks-server"
-LABEL org.opencontainers.image.version="latest"
-
-WORKDIR /app
-COPY --from=0 /tmp/mks-server /app/mks-server
-COPY ./config /app/config
-
-ENTRYPOINT ["/app/mks-server"]
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: mks-server-clusterRoleBinding
+  labels:
+    app.kubernetes.io/instance: mks-server-clusterRoleBinding
+subjects:
+  - kind: ServiceAccount
+    name: mks-server-sa
+    namespace: mks
+roleRef:
+  kind: ClusterRole
+  name: mks-server-clusterRole
+  apiGroup: rbac.authorization.k8s.io

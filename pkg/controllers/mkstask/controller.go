@@ -97,7 +97,8 @@ func (c *controller) handleAdd(obj interface{}) {
 	if er != nil {
 		log.Fatalf("Cannot get tekton client: %s", er.Error())
 	}
-	tsk, err := Create(cs, obj.(*v1alpha1.MksTask), metav1.CreateOptions{}, obj.(*v1alpha1.MksTask).GetObjectMeta().GetNamespace())
+	addObj := obj.(*v1alpha1.MksTask)
+	tsk, err := Create(cs, addObj, metav1.CreateOptions{}, addObj.GetObjectMeta().GetNamespace())
 	if err != nil {
 		db.Increment(rClient, "MKSTASKFAILED")
 		fmt.Errorf("Couldn't create tekton task: %s", err.Error())
@@ -117,7 +118,8 @@ func (c *controller) handleUpdate(old, obj interface{}) {
 	if er != nil {
 		log.Fatalf("Cannot get tekton client: %s", er.Error())
 	}
-	tsk, err := Update(cs, obj.(*v1alpha1.MksTask), metav1.UpdateOptions{}, obj.(*v1alpha1.MksTask).GetObjectMeta().GetNamespace())
+	updObj := obj.(*v1alpha1.MksTask)
+	tsk, err := Update(cs, updObj, metav1.UpdateOptions{}, updObj.GetObjectMeta().GetNamespace())
 	if err != nil {
 		fmt.Errorf("Couldn't update tekton task: %s", err.Error())
 	} else {
@@ -134,7 +136,8 @@ func (c *controller) handleDel(obj interface{}) {
 	if er != nil {
 		log.Fatalf("Cannot get tekton client: %s", er.Error())
 	}
-	err := Delete(cs, obj.(*v1alpha1.MksTask).Name, metav1.DeleteOptions{}, obj.(*v1alpha1.MksTask).GetObjectMeta().GetNamespace())
+	delObj := obj.(*v1alpha1.MksTask)
+	err := Delete(cs, delObj.Name, metav1.DeleteOptions{}, delObj.GetObjectMeta().GetNamespace())
 	if err != nil {
 		log.Fatalf("Cannot delete tekton task!!: %s", err.Error())
 	}
