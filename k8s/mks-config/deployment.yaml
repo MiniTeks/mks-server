@@ -33,7 +33,7 @@ spec:
       serviceAccountName: mks-server-sa
       containers:
       - name: mks-server
-        image: ghcr.io/MiniTeks/mks-server:latest
+        image: ghcr.io/miniteks/mks-server:latest
         imagePullPolicy: Always
         resources:
           limits:

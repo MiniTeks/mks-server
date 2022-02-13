@@ -29,7 +29,7 @@ jobs:
       packages: write
       contents: read
     env:
-      IMAGE_NAME: ghcr.io/MiniTeks/mks-server:latest
+      IMAGE_NAME: ghcr.io/miniteks/mks-server:latest
 
     steps:
       - uses: actions/checkout@v2
