@@ -114,6 +114,37 @@ in advance.
     kubectl apply -f config/mksResourceExample/<cr-example>.yaml
 ```
 
+### Steps to Deploy on k8s/openshift cluster
+
+0. Get the cluster configured, and create a namespace "*mks*"
+```bash
+	oc new-project mks
+```
+1. Install tekton pipelines operator in the cluster.
+```bash
+	oc apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
+```
+2. Apply the files to create the mks resources inside the cluster
+```bash
+	oc apply -f config/mksCRDs
+```
+3 Get db server up and running.
+```bash
+	oc apply -f k8s/db-config
+```
+4. Get mks-server up and running.
+```bash
+	oc apply -f k8s/mks-config
+```
+5. Apply the files to create the mks resource examples
+```bash
+	oc apply -f config/mksResourceExample
+```
+6. Check the logs to verify
+```bash
+	oc logs -f -n mks $(oc get pods -n mks | grep mks-server | cut -d' ' -f1)
+```
+
 ## Architectural Design
 
 (_Diagram will be added here_)
