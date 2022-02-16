@@ -18,8 +18,6 @@
 package mkstask
 
 import (
-	"fmt"
-	"log"
 	"time"
 
 	"github.com/MiniTeks/mks-server/pkg/apis/mkscontroller/v1alpha1"
@@ -33,6 +31,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
+	"k8s.io/klog/v2"
 )
 
 var rClient *redis.Client
@@ -64,11 +63,9 @@ func NewController(clientset examplecomclientset.Clientset, mksTaskInformer apps
 }
 
 func (c *controller) Run(ch <-chan struct{}) {
-	fmt.Println("starting controller")
 	if !cache.WaitForCacheSync(ch, c.mksTaskCacheSynced) {
-		fmt.Print("waiting for cache to be synced\n")
+		klog.Info("\twaiting for cache to be synced\n")
 	}
-
 	go wait.Until(c.worker, 1*time.Second, ch)
 
 	<-ch
@@ -76,7 +73,6 @@ func (c *controller) Run(ch <-chan struct{}) {
 
 func (c *controller) worker() {
 	for c.processItem() {
-
 	}
 }
 
@@ -90,57 +86,62 @@ func (c *controller) processItem() bool {
 }
 
 func (c *controller) handleAdd(obj interface{}) {
-	fmt.Println("\n Add handler was called")
-	fmt.Println(obj)
+	klog.Info("\tAdd mkstask was called\n")
+	db.Increment(rClient, "MKSTASKCREATED")
 	tp := &tconfig.TektonParam{}
 	cs, er := tp.Client()
 	if er != nil {
-		log.Fatalf("Cannot get tekton client: %s", er.Error())
+		klog.Fatalf("\tCannot get the tekton client: %v\n", er)
+		db.Increment(rClient, "MKSTASKFAILED")
+		return
 	}
 	addObj := obj.(*v1alpha1.MksTask)
 	tsk, err := Create(cs, addObj, metav1.CreateOptions{}, addObj.GetObjectMeta().GetNamespace())
 	if err != nil {
+		klog.Errorf("\tCannot create mkstask: %v\n", err)
 		db.Increment(rClient, "MKSTASKFAILED")
-		fmt.Errorf("Couldn't create tekton task: %s", err.Error())
+		return
 	} else {
-		db.Increment(rClient, "MKSTASKCREATED")
-		fmt.Println("tekton task created")
-		fmt.Printf("uid %s", tsk.UID)
+		klog.Infof("\tMksTask %s created: %s\n", tsk.GetName(), tsk.GetUID())
+		db.Increment(rClient, "MKSTASKCOMPLETED")
 	}
-
 	c.queue.Add(obj)
 }
 
 func (c *controller) handleUpdate(old, obj interface{}) {
-	fmt.Println("\n Update handler was called")
+	klog.Info("\tUpdate mkstask was called\n")
 	tp := &tconfig.TektonParam{}
 	cs, er := tp.Client()
 	if er != nil {
-		log.Fatalf("Cannot get tekton client: %s", er.Error())
+		klog.Fatalf("\tCannot get the tekton client: %v\n", er)
+		return
 	}
 	updObj := obj.(*v1alpha1.MksTask)
 	tsk, err := Update(cs, updObj, metav1.UpdateOptions{}, updObj.GetObjectMeta().GetNamespace())
 	if err != nil {
-		fmt.Errorf("Couldn't update tekton task: %s", err.Error())
+		klog.Errorf("\tCannot update mkstask: %v", err)
 	} else {
-		fmt.Println("tekton task updated")
-		fmt.Printf("uid %s", tsk.UID)
+		klog.Infof("\tMksTask %s updated: %s", tsk.GetName(), tsk.GetUID())
 	}
 	c.queue.Add(obj)
 }
 
 func (c *controller) handleDel(obj interface{}) {
-	fmt.Println("\n Delete handler was called")
+	klog.Infof("\tDelete mkstask was called\n")
 	tp := &tconfig.TektonParam{}
 	cs, er := tp.Client()
 	if er != nil {
-		log.Fatalf("Cannot get tekton client: %s", er.Error())
+		klog.Fatalf("\tCannot get the tekton client: %v\n", er)
+		return
 	}
 	delObj := obj.(*v1alpha1.MksTask)
 	err := Delete(cs, delObj.Name, metav1.DeleteOptions{}, delObj.GetObjectMeta().GetNamespace())
 	if err != nil {
-		log.Fatalf("Cannot delete tekton task!!: %s", err.Error())
+		klog.Errorf("\tCannot delete mkstask %s: %v\n", delObj.GetName(), err)
+		return
+	} else {
+		klog.Infof("\tMksTask %s deleted\n", delObj.GetName())
+		db.Increment(rClient, "MKSTASKDELETED")
 	}
-	db.Increment(rClient, "MKSTASKDELETED")
 	c.queue.Add(obj)
 }

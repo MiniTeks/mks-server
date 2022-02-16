@@ -18,11 +18,8 @@
 package mkspipelinerun
 
 import (
-	"fmt"
-
 	"github.com/MiniTeks/mks-server/pkg/actions"
 	"github.com/MiniTeks/mks-server/pkg/apis/mkscontroller/v1alpha1"
-	"github.com/MiniTeks/mks-server/pkg/db"
 	"github.com/MiniTeks/mks-server/pkg/tconfig"
 	prbeta "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -81,54 +78,4 @@ func Delete(cl *tconfig.Client, opt metav1.DeleteOptions, mprName string, ns str
 		return err
 	}
 	return nil
-}
-
-// Add method of controller for informer function: AddFunc
-func (c *controller) handleAdd(obj interface{}) {
-	fmt.Println("add was called")
-	fmt.Println(obj)
-	tp := &tconfig.TektonParam{}
-	cs, err := tp.Client()
-	if err != nil {
-		fmt.Errorf("Cannot get client %v", err)
-	}
-	pr, err := Create(cs, obj.(*v1alpha1.MksPipelineRun), metav1.CreateOptions{}, obj.(*v1alpha1.MksPipelineRun).Namespace)
-	if err != nil {
-		db.Increment(rClient, "mksPipelineRunfailed")
-		return
-	} else {
-		db.Increment(rClient, "mksPipelineRuncreated")
-		fmt.Println("PipelineRun created")
-		fmt.Printf("uid %s", pr.UID)
-	}
-
-	c.queue.Add(obj)
-}
-
-// Update method of controller for informer function: UpdateFunc
-// It gets new object & resource version can be checked to figure out if resource was edited or not
-func (c *controller) handleUpdate(old, new interface{}) {
-	fmt.Println("Update was called")
-
-}
-
-// Delete method of controller for informer function: DeleteFunc
-func (c *controller) handleDelete(obj interface{}) {
-	tp := &tconfig.TektonParam{}
-	cs, err := tp.Client()
-	if err != nil {
-		fmt.Errorf("Cannot connect to Tekton client: %v", err)
-		return
-	}
-	errDel := Delete(cs, metav1.DeleteOptions{}, obj.(*v1alpha1.MksPipelineRun).Name, obj.(*v1alpha1.MksPipelineRun).Namespace)
-	if errDel != nil {
-		fmt.Errorf("Cannot delete MksPipelineRun: %v", errDel)
-		return
-	} else {
-		fmt.Println("MksPipelineRun has been deleted")
-
-		db.Increment(rClient, "mksPipelineRundeleted")
-	}
-
-	c.queue.Add(obj)
 }

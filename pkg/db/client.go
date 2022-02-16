@@ -19,10 +19,9 @@ package db
 
 import (
 	"context"
-	"fmt"
-	"log"
 
 	"github.com/go-redis/redis/v8"
+	"k8s.io/klog/v2"
 )
 
 var ctx = context.Background()
@@ -38,10 +37,9 @@ func GetRedisClient(cred *RClient) *redis.Client {
 
 	ping, err := rdb.Ping(ctx).Result()
 	if err != nil {
-		log.Fatal("Couldn't connect to redis-database")
+		klog.Fatalf("Couldn't connect to redis-database: %v\n", err)
 	} else {
-		fmt.Print(ping, err)
-		fmt.Println("Connected to the redis-db server")
+		klog.Infof("\t%s\tConnected to the redis-db server\n", ping)
 	}
 	return rdb
 }
