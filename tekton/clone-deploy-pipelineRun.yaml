@@ -1,0 +1,28 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  creationTimestamp: null
+  generateName: clone-deploy-run-
+  namespace: mks
+spec:
+  serviceAccountName: pipeline
+  params:
+  - name: IMAGE
+    value: ghcr.io/miniteks/mks-server:latest
+  - name: deployment-name
+    value: mks-server
+  - name: git-revision
+    value: main
+  - name: git-url
+    value: https://github.com/MiniTeks/mks-server
+  - name: skip_push
+    value: "true"
+  - name: Dockerfile
+    value: "./Dockerfile"
+  pipelineRef:
+    name: clone-deploy
+  workspaces:
+  - name: shared-workspace
+    persistentVolumeClaim:
+      claimName: source-pvc
+status: {}
