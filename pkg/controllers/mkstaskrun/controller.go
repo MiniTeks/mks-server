@@ -18,7 +18,6 @@
 package mkstaskrun
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/MiniTeks/mks-server/pkg/apis/mkscontroller/v1alpha1"
@@ -32,6 +31,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
+	"k8s.io/klog/v2"
 )
 
 var rClient *redis.Client
@@ -64,57 +64,56 @@ func NewController(kubeclientset kubernetes.Interface,
 }
 
 func (c *Controller) addController(obj interface{}) {
-	fmt.Println("MksTaskRun has been created")
-
+	klog.Info("\tAdd mkstaskrun was called\n")
+	db.Increment(rClient, "MKSTASKRUNCREATED")
 	tp := &tconfig.TektonParam{}
 	tcl, err := tp.Client()
 	if err != nil {
-		fmt.Errorf("Cannot connect to Tekton client: %w", err)
+		klog.Fatalf("\tCannot get the tekton client: %v\n", err)
+		db.Increment(rClient, "MKSTASKRUNFAILED")
 		return
 	}
 	var crtobj = obj.(*v1alpha1.MksTaskRun)
 	ttr, err := Create(tcl, crtobj, metav1.CreateOptions{}, crtobj.Namespace)
 	if err != nil {
-		db.Increment(rClient, "mksTaskRunfailed")
-		fmt.Errorf("Cannot create Tekton TaskRun: %w", err)
+		klog.Errorf("\tCannot create mkstaskrun: %v\n", err)
+		db.Increment(rClient, "MKSTASKRUNFAILED")
 		return
 	} else {
-		db.Increment(rClient, "mksTaskRuncreated")
+		db.Increment(rClient, "MKSTASKRUNCOMPLETED")
+		klog.Infof("\tMksTaskRun %s created: %s\n", ttr.GetName(), ttr.GetUID())
 	}
-
-	fmt.Printf("Successfully created Tekton TaskRun: %s\n", ttr.Name)
 	c.queue.Add(obj)
 }
 
 func (c *Controller) updateController(oldObj, newObj interface{}) {
-	fmt.Println("MksTaskRun has been updated")
+	klog.Info("\tUpdate mkstaskrun was called\n")
 }
 
 func (c *Controller) deleteController(obj interface{}) {
-
+	klog.Infof("\tDelete mkstaskrun was called\n")
 	tp := &tconfig.TektonParam{}
 	tcl, err := tp.Client()
 	if err != nil {
-		fmt.Errorf("Cannot connect to Tekton client: %w", err)
+		klog.Fatalf("\tCannot get the tekton client: %v\n", err)
 		return
 	}
 
 	var delobj = obj.(*v1alpha1.MksTaskRun)
 	delerr := Delete(tcl, delobj.Name, metav1.DeleteOptions{}, delobj.Namespace)
 	if delerr != nil {
-		fmt.Errorf("Cannot delete MksTaskRun: %v", delerr)
+		klog.Errorf("\tCannot delete mkstaskrun: %v\n", err)
 		return
 	} else {
-		fmt.Println("MksTaskRun has been deleted")
-		db.Increment(rClient, "mksTaskRundeleted")
+		klog.Infof("\tMksTaskRun %s deleted\n", delobj.GetName())
+		db.Increment(rClient, "MKSTASKRUNDELETED")
 	}
 	c.queue.Add(obj)
 }
 
 func (c *Controller) Run(ch <-chan struct{}) {
-	fmt.Println("starting controller")
 	if !cache.WaitForCacheSync(ch, c.mksTaskRunSync) {
-		fmt.Print("waiting for cache to be synced\n")
+		klog.Info("\twaiting for cache to be synced\n")
 	}
 
 	go wait.Until(c.worker, 1*time.Second, ch)

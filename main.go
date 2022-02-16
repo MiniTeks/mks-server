@@ -44,27 +44,26 @@ var (
 
 func main() {
 
-	fmt.Println("Hello mks-server")
+	klog.Info("\tHello from mks-server\n")
 	klog.InitFlags(nil)
 	flag.Parse()
 	cfg, err := clientcmd.BuildConfigFromFlags(master, kuberconfig)
 	if err != nil {
-		fmt.Printf("\nCouldn't build kubeconfig from user's-local: %v\n", err.Error())
-		fmt.Println("Building kubeconfig from InClusterConfig")
+		klog.Infof("\tCouldn't build kubeconfig from user's-local: %v\n\tBuilding kubeconfig from InClusterConfig\n", err)
 		cfg, err = rest.InClusterConfig()
 		if err != nil {
-			klog.Fatalf("Error %s, getting inclusterconfig", err.Error())
+			klog.Fatalf("\tError %v, getting inclusterconfig\n", err)
 		}
 	}
 
 	mksClient, err := mksclientset.NewForConfig(cfg)
 	if err != nil {
-		klog.Fatalf("Error building mks client: %v", err)
+		klog.Fatalf("\tError building mks client: %v\n", err)
 	}
 
 	kubeClient, err := kubernetes.NewForConfig(cfg)
 	if err != nil {
-		klog.Fatalf("Error getting kube client: %v", err)
+		klog.Fatalf("\tError getting kube client: %v\n", err)
 	}
 
 	// redis-db client
@@ -83,10 +82,11 @@ func main() {
 	// sync in memory cache with kubernetes cluster state in every 10 min
 	ch := make(chan struct{})
 	informers := informers.NewSharedInformerFactory(mksClient, 10*time.Minute)
+	klog.Info("\tStarting controller...\n")
 	mprc := mprcontroller.NewController(kubeClient, mksClient, informers.Mkscontroller().V1alpha1().MksPipelineRuns(), redisClient)
 	mtc := mtcontroller.NewController(*mksClient, informers.Mkscontroller().V1alpha1().MksTasks(), redisClient)
 	mtrc := mtrcontroller.NewController(kubeClient, mksClient, informers.Mkscontroller().V1alpha1().MksTaskRuns(), redisClient)
-
+	klog.Info("\tListening for mks-resources...\n")
 	informers.Start(ch)
 
 	// starting controller by calling run() and passing channel ch
@@ -100,11 +100,12 @@ func main() {
 func init() {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		fmt.Errorf("Couldn't read user's home directory!!")
+		klog.Infof("\nCouldn't read user's home directory: %v\n", err)
 	}
 	home = home + "/.kube/config"
 	flag.StringVar(&kuberconfig, "kubeconfig", home, "Path to a kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&master, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&dbAddr, "addr", "127.0.0.1:6379", "The address of the redis server")
 	flag.StringVar(&password, "password", "12345", "The password of the redis database.")
+	
 }
