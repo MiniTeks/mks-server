@@ -1,0 +1,8 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: mks-server-eventlistener
+spec:
+  serviceAccountName: pipeline
+  triggers:
+    - triggerRef: mks-server-trigger
