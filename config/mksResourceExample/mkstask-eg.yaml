@@ -1,10 +1,10 @@
 apiVersion: mkscontroller.example.mks/v1alpha1
 kind: MksTask
 metadata:
-  name: hello2
-  namespace: default
+  name: hello
+  namespace: mks
 spec:
-  name: hello2
+  name: hello
   args: args
   command: ls
   image: ubuntu

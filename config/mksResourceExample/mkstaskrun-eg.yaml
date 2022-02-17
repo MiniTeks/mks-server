@@ -2,6 +2,7 @@ apiVersion: mkscontroller.example.mks/v1alpha1
 kind: MksTaskRun
 metadata:
   name: test-mkstaskrun
+  namespace: mks
 spec:
   taskRef:
     name: hello1

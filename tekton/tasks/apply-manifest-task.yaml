@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2022 Satyam Bhardwaj <sabhardw@redhat.com>
+# SPDX-FileCopyrightText: 2022 Utkarsh Chaurasia <uchauras@redhat.com>
+# SPDX-FileCopyrightText: 2022 Avinal Kumar <avinkuma@redhat.com>
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: apply-manifest
+spec:
+  workspaces:
+  - name: source
+  params:
+    - name: manifest_dir
+      description: The directory in source that contains yaml manifests
+      type: string
+      default: "k8s/mks-config/deployment.yaml"
+  steps:
+    - name: apply
+      image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+      command: ["/bin/bash", "-c"]
+      workingDir: /workspace/source
+      args: 
+        - |-
+         echo "Applying manifests in $(inputs.params.manifest_dir) directory"
+         oc apply -f $(inputs.params.manifest_dir)
+         echo ------------------------

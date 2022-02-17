@@ -2,6 +2,7 @@ apiVersion: mkscontroller.example.mks/v1alpha1
 kind: MksPipelineRun
 metadata:
   name: test-pipelinerun2
+  namespace: mks
 spec:
   pipelineRef:
     name: hello
