@@ -28,6 +28,10 @@ type FakeMkscontrollerV1alpha1 struct {
 	*testing.Fake
 }
 
+func (c *FakeMkscontrollerV1alpha1) MksPipelines(namespace string) v1alpha1.MksPipelineInterface {
+	return &FakeMksPipelines{c, namespace}
+}
+
 func (c *FakeMkscontrollerV1alpha1) MksPipelineRuns(namespace string) v1alpha1.MksPipelineRunInterface {
 	return &FakeMksPipelineRuns{c, namespace}
 }

@@ -28,6 +28,7 @@ import (
 
 type MkscontrollerV1alpha1Interface interface {
 	RESTClient() rest.Interface
+	MksPipelinesGetter
 	MksPipelineRunsGetter
 	MksTasksGetter
 	MksTaskRunsGetter
@@ -36,6 +37,10 @@ type MkscontrollerV1alpha1Interface interface {
 // MkscontrollerV1alpha1Client is used to interact with features provided by the mkscontroller.example.mks group.
 type MkscontrollerV1alpha1Client struct {
 	restClient rest.Interface
+}
+
+func (c *MkscontrollerV1alpha1Client) MksPipelines(namespace string) MksPipelineInterface {
+	return newMksPipelines(c, namespace)
 }
 
 func (c *MkscontrollerV1alpha1Client) MksPipelineRuns(namespace string) MksPipelineRunInterface {

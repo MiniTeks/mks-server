@@ -1,0 +1,9 @@
+apiVersion: mkscontroller.example.mks/v1alpha1
+kind: MksPipeline
+metadata:
+  name: test-pipeline2
+spec:
+  tasks:
+    name: hello
+    taskRef:
+      name: hello
