@@ -21,7 +21,15 @@ metadata:
   name: update-deployment
   namespace: default
 spec:
-  name: hello2
-  args: args
-  command: ls
-  image: ubuntu
+  workspaces:
+    - name: source
+  params:
+    - name: manifest_dir
+      description: The directory in source that contains yaml manifests
+      type: string
+      default: "k8s/mks-config/deployment.yaml"
+  steps:
+    - name: build-image
+      image: docker
+      command: "/bin/bash -c"
+      args: "echo hello world"

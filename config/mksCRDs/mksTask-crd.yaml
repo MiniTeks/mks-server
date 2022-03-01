@@ -33,14 +33,34 @@ spec:
             spec:
               type: object
               properties:
-                name:
-                  type: string
-                image:
-                  type: string
-                command:
-                  type: string
-                args:
-                  type: string
+                steps:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      image:
+                        type: string
+                      command:
+                        type: string
+                      workingDir:
+                        type: string
+                      args:
+                        type: string
+                params:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      description:
+                        type: string
+                      type:
+                        type: string
+                      default:
+                        type: string
 
   names:
     kind: MksTask

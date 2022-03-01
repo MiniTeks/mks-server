@@ -45,17 +45,30 @@ func ConvertToTekton(mt *v1alpha1.MksTask) *v1beta1.Task {
 		Name:      mt.ObjectMeta.Name,
 		Namespace: mt.ObjectMeta.Namespace,
 	}
-	res.Spec = v1beta1.TaskSpec{
-		Steps: []v1beta1.Step{
-			{
-				Container: v1.Container{
-					Image:   mt.Spec.Image,
-					Name:    mt.Spec.Name,
-					Command: []string{mt.Spec.Command},
-					Args:    []string{mt.Spec.Args},
-				},
+	var tstep []v1beta1.Step
+	for _, stp := range mt.Spec.Steps {
+		tstep = append(tstep, v1beta1.Step{
+			Container: v1.Container{
+				Name:       stp.Name,
+				Image:      stp.Image,
+				Command:    []string{stp.Command},
+				WorkingDir: stp.WorkingDir,
+				Args:       []string{stp.Args},
 			},
-		},
+		})
+	}
+	var tparam []v1beta1.ParamSpec
+	for _, prm := range mt.Spec.Params {
+		tparam = append(tparam, v1beta1.ParamSpec{
+			Name:        prm.Name,
+			Type:        v1beta1.ParamType(prm.Type),
+			Description: prm.Description,
+			Default:     v1beta1.NewArrayOrString(prm.Default),
+		})
+	}
+	res.Spec = v1beta1.TaskSpec{
+		Steps:  tstep,
+		Params: tparam,
 	}
 	return res
 }
@@ -140,5 +153,4 @@ func Update(cl *tconfig.Client, mt *v1alpha1.MksTask, opt metav1.UpdateOptions,
 		return nil, err
 	}
 	return task, nil
-
 }

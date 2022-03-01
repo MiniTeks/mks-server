@@ -21,7 +21,9 @@ import (
 	"github.com/MiniTeks/mks-server/pkg/actions"
 	"github.com/MiniTeks/mks-server/pkg/apis/mkscontroller/v1alpha1"
 	"github.com/MiniTeks/mks-server/pkg/tconfig"
+	"github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	prbeta "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -41,8 +43,25 @@ func ConvertToTekton(mpr *v1alpha1.MksPipelineRun) *prbeta.PipelineRun {
 		Name:      mpr.ObjectMeta.Name,
 		Namespace: mpr.ObjectMeta.Namespace,
 	}
+	var tparam []v1beta1.Param
+	for _, prm := range mpr.Spec.Params {
+		tparam = append(tparam, v1beta1.Param{
+			Name:  prm.Name,
+			Value: *v1beta1.NewArrayOrString(prm.Value),
+		})
+	}
+	var twork []v1beta1.WorkspaceBinding
+	for _, wrk := range mpr.Spec.Workspaces {
+		twork = append(twork, v1beta1.WorkspaceBinding{
+			Name:                  wrk.Name,
+			PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{ClaimName: wrk.PersistentVolumeClaim.ClaimName},
+			ConfigMap:             &v1.ConfigMapVolumeSource{LocalObjectReference: v1.LocalObjectReference{Name: wrk.ConfigMap.Name}},
+		})
+	}
 	res.Spec = prbeta.PipelineRunSpec{
 		PipelineRef: &prbeta.PipelineRef{Name: mpr.Spec.PipelineRef.Name},
+		Params:      tparam,
+		Workspaces:  twork,
 	}
 	return res
 }

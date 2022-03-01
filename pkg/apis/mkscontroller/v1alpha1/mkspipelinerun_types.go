@@ -64,6 +64,8 @@ type MksPipelineRun struct {
 // MksPipelineRunSpec struct defines the Spec field of MksPipelineRun struct.
 type MksPipelineRunSpec struct {
 	PipelineRef MksPipelineRunRef `json:"pipelineRef"`
+	Workspaces  []MksprWorkspaces `json:"workspaces,omitempty"`
+	Params      []MksParam        `json:"params,omitempty"`
 }
 
 // MksPipelneRunRef struct defines the PipelineRef field of MkspipelineRunref.
