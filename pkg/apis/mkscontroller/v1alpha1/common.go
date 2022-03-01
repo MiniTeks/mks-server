@@ -50,3 +50,29 @@ type Param struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
 }
+
+type MksprWorkspaces struct {
+	Name                  string                   `json:"name"`
+	PersistentVolumeClaim MksPersistentVolumeClaim `json:"persistentVolumeClaim,omitempty"`
+	ConfigMap             MksConfigMap             `json:"configMap,omitempty"`
+}
+
+type MksPersistentVolumeClaim struct {
+	ClaimName string `json:"claimName"`
+}
+
+type MksConfigMap struct {
+	Name string `json:"name"`
+}
+
+type MksParamSpec struct {
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+	Type        string `json:"type"`
+	Default     string `json:"default,omitempty"`
+}
+
+type MksParam struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}

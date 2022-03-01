@@ -38,6 +38,32 @@ spec:
                   properties:
                     name:
                       type: string
+                workspaces:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      persistentVolumeClaim:
+                        type: object
+                        properties:
+                          claimName:
+                            type: string
+                      configMap:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                params:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      value:
+                        type: string
 
   names:
     kind: MksPipelineRun

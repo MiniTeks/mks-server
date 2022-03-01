@@ -18,7 +18,26 @@
 apiVersion: mkscontroller.example.mks/v1alpha1
 kind: MksPipelineRun
 metadata:
-  name: test-pipelinerun2
+  creationTimestamp: null
+  generateName: clone-build-deploy-run-
+  namespace: mks
 spec:
+  params:
+    - name: Dockerfile
+      value: ./Dockerfile
+    - name: IMAGE
+      value: ghcr.io/miniteks/mks-server:latest
+    - name: deployment-name
+      value: mks-server
+    - name: git-revision
+      value: main
+    - name: git-url
+      value: " https://github.com/MiniTeks/mks-server"
+    - name: skip_push
+      value: "true"
   pipelineRef:
-    name: hello
+    name: clone-build-deploy
+  workspaces:
+    - name: shared-workspace
+      persistentVolumeClaim:
+        claimName: source-pvc
