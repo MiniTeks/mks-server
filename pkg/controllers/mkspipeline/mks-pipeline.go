@@ -21,7 +21,7 @@ import (
 	"github.com/MiniTeks/mks-server/pkg/actions"
 	"github.com/MiniTeks/mks-server/pkg/apis/mkscontroller/v1alpha1"
 	"github.com/MiniTeks/mks-server/pkg/tconfig"
-	pbeta "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+	"github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -33,25 +33,68 @@ var prGroupResource = schema.GroupVersionResource{Group: "tekton.dev", Resource:
 
 // ConvertToTekton converts a mksresource into corresponding Tekton resource
 // definition using field to field copy from mks object to tekton object.
-func ConvertToTekton(mp *v1alpha1.MksPipeline) *pbeta.Pipeline {
-	res := &pbeta.Pipeline{}
+func ConvertToTekton(mp *v1alpha1.MksPipeline) *v1beta1.Pipeline {
+
+	var specWorkspaceList []v1beta1.PipelineWorkspaceDeclaration
+	for _, sws := range mp.Spec.Workspaces {
+
+		specWorkspaceList = append(specWorkspaceList, v1beta1.PipelineWorkspaceDeclaration{
+			Name: sws.Name,
+		})
+
+	}
+
+	var specParamList []v1beta1.ParamSpec
+	for _, spr := range mp.Spec.Param {
+
+		specParamList = append(specParamList, v1beta1.ParamSpec{
+			Name:        spr.Name,
+			Type:        v1beta1.ParamType(spr.Type),
+			Description: spr.Description,
+			Default:     v1beta1.NewArrayOrString(spr.Default),
+		})
+	}
+
+	var specTaskList []v1beta1.PipelineTask
+	for _, spt := range mp.Spec.Task {
+
+		var taskParamList []v1beta1.Param
+		for _, obj2 := range spt.Param {
+			taskParamList = append(taskParamList, v1beta1.Param{
+				Name:  obj2.Name,
+				Value: *v1beta1.NewArrayOrString(obj2.Name),
+			})
+		}
+
+		var taskWorkspaceList []v1beta1.WorkspacePipelineTaskBinding
+		for _, obj2 := range spt.Workspaces {
+			taskWorkspaceList = append(taskWorkspaceList, v1beta1.WorkspacePipelineTaskBinding{
+				Name:      obj2.Name,
+				Workspace: obj2.Workspace,
+			})
+		}
+
+		specTaskList = append(specTaskList, v1beta1.PipelineTask{
+			Name:       spt.Name,
+			TaskRef:    &v1beta1.TaskRef{Name: spt.PipelineTaskRef.Name},
+			Workspaces: taskWorkspaceList,
+			Params:     taskParamList,
+			RunAfter:   spt.RunAfter,
+		})
+
+	}
+
+	res := &v1beta1.Pipeline{}
 	res.Kind = "Pipeline"
 	res.APIVersion = "tekton.dev/v1beta1"
 	res.ObjectMeta = metav1.ObjectMeta{
 		Name:      mp.ObjectMeta.Name,
 		Namespace: mp.ObjectMeta.Namespace,
 	}
-	// res.Spec = pbeta.PipelineSpec{
-
-	// 	PipelineTaskRef: &pbeta.MksPipelineTaskRef{Name: mp.Spec.PipelineTaskRef.Name},
-	// }
-	res.Spec = pbeta.PipelineSpec{
-		Tasks: []pbeta.PipelineTask{
-			{
-				Name:    mp.Spec.Task.Name,
-				TaskRef: &pbeta.TaskRef{Name: mp.Spec.Task.PipelineTaskRef.Name},
-			},
-		},
+	res.Spec = v1beta1.PipelineSpec{
+		Workspaces: specWorkspaceList,
+		Params:     specParamList,
+		Tasks:      specTaskList,
 	}
 	return res
 }
@@ -61,7 +104,7 @@ func ConvertToTekton(mp *v1alpha1.MksPipeline) *pbeta.Pipeline {
 // the actions package to create resource on Kubernetes/OpenShift cluster using
 // Tekton API.
 func Create(cl *tconfig.Client, mp *v1alpha1.MksPipeline,
-	opt metav1.CreateOptions, ns string) (*pbeta.Pipeline, error) {
+	opt metav1.CreateOptions, ns string) (*v1beta1.Pipeline, error) {
 
 	tkp := ConvertToTekton(mp)
 
@@ -73,7 +116,7 @@ func Create(cl *tconfig.Client, mp *v1alpha1.MksPipeline,
 	if err != nil {
 		return nil, err
 	}
-	var pipeline *pbeta.Pipeline
+	var pipeline *v1beta1.Pipeline
 	if err := runtime.DefaultUnstructuredConverter.FromUnstructured(nustpr.UnstructuredContent(), &pipeline); err != nil {
 		return nil, err
 	}
