@@ -15,11 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: mkscontroller.example.mks/v1alpha1
-kind: MksTaskRun
+apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
-  name: test-mkstaskrun
+  name: test-source-pvc
   namespace: mks
 spec:
-  taskRef:
-    name: hello1
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi

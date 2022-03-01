@@ -22,8 +22,11 @@ metadata:
   labels:
     app.kubernetes.io/instance: mks-server-clusterRole
 rules:
+  - apiGroups: ["mkscontroller.example.mks"]
+    resources: ["mkstasks", "mkstaskruns", "mkspipelineruns", "mkspipelines"]
+    verbs: ["get", "list", "create", "update", "delete", "watch", "patch"]
+
   - apiGroups: [""]
-    # Controller needs to watch Pods created by TaskRuns to see them progress.
     resources: ["pods"]
     verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
     # Controller needs cluster access to all of the CRDs that it is responsible for
@@ -57,7 +60,3 @@ rules:
         "runs/status",
       ]
     verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
-  - apiGroups: ["mkscontroller.example.mks"]
-    # Controller needs to watch Pods created by TaskRuns to see them progress.
-    resources: ["mkstasks", "mkstaskruns", "mkspipelineruns", "mkspipelines"]
-    verbs: ["get", "list", "create", "update", "delete", "watch"]

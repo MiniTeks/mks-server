@@ -15,11 +15,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: mkscontroller.example.mks/v1alpha1
-kind: MksTaskRun
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: test-mkstaskrun
-  namespace: mks
-spec:
-  taskRef:
-    name: hello1
+  name: docker-config
+data:
+  config.json: |-
+    {
+    "auths":{
+    "https://index.docker.io/v1/": {
+                "auth": ""
+                                  }
+            }
+    }
+

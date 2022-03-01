@@ -1,0 +1,68 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2022 Satyam Bhardwaj <sabhardw@redhat.com>
+# SPDX-FileCopyrightText: 2022 Utkarsh Chaurasia <uchauras@redhat.com>
+# SPDX-FileCopyrightText: 2022 Avinal Kumar <avinkuma@redhat.com>
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: build
+spec:
+  workspaces:
+    - name: source
+  params:
+  - name: IMAGE
+    description: Reference of the image build task will produce.
+  - name: BUILDER_IMAGE
+    description: The location of the buildah builder image.
+    default: quay.io/buildah/stable:v1.18.0
+  - name: STORAGE_DRIVER
+    description: Set buildah storage driver
+    default: overlay
+  - name: DOCKERFILE
+    description: Path to the Dockerfile to build.
+    default: ./Dockerfile
+  - name: CONTEXT
+    description: Path to the directory to use as context.
+    default: .
+  - name: TLSVERIFY
+    description: Verify the TLS on the registry endpoint (for push/pull to a non-TLS registry)
+    default: "true"
+
+  steps:
+  - name: build
+    image: gcr.io/cloud-builders/docker
+    # image: $(params.BUILDER_IMAGE)
+    workingDir: $(workspaces.source.path)
+    args:
+        [
+          "build",
+          "--no-cache",
+          "--tag",
+          "$(params.IMAGE)",
+          "--file",
+          "$(params.DOCKERFILE)",
+          "$(params.CONTEXT)",
+        ]
+    securityContext:
+      runAsUser: 0
+    volumeMounts:
+      - name: docker-socket
+        mountPath: /var/run/docker.sock
+  volumes:
+    - name: docker-socket
+      hostPath:
+        path: /var/run/docker.sock
+        type: Socket

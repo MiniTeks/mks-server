@@ -15,11 +15,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: mkscontroller.example.mks/v1alpha1
-kind: MksTaskRun
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: Trigger
 metadata:
-  name: test-mkstaskrun
-  namespace: mks
+  name: mks-server-test-trigger
 spec:
-  taskRef:
-    name: hello1
+  serviceAccountName: pipeline
+  interceptors:
+    - ref:
+        name: "github"
+      params:
+        - name: "secretRef"
+          value:
+            secretName: github-secret
+            secretKey: secretToken
+        - name: "eventTypes"
+          value: ["pull_request"]
+  bindings:
+    - ref: mks-server-test-triggerbinding
+  template:
+    ref: mks-server-test-template

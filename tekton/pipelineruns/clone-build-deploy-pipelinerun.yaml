@@ -15,11 +15,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: mkscontroller.example.mks/v1alpha1
-kind: MksTaskRun
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineRun
 metadata:
-  name: test-mkstaskrun
+  creationTimestamp: null
+  generateName: clone-build-deploy-run-
   namespace: mks
 spec:
-  taskRef:
-    name: hello1
+  serviceAccountName: pipeline
+  params:
+  - name: Dockerfile
+    value: ./Dockerfile
+  - name: IMAGE
+    value: ghcr.io/miniteks/mks-server:latest
+  - name: deployment-name
+    value: mks-server
+  - name: git-revision
+    value: main
+  - name: git-url
+    value: https://github.com/MiniTeks/mks-server
+  pipelineRef:
+    name: clone-build-deploy
+  workspaces:
+  - name: shared-workspace
+    persistentVolumeClaim:
+      claimName: source-pvc
+status: {}

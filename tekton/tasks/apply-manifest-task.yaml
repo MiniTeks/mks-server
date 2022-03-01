@@ -15,11 +15,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: mkscontroller.example.mks/v1alpha1
-kind: MksTaskRun
+apiVersion: tekton.dev/v1beta1
+kind: Task
 metadata:
-  name: test-mkstaskrun
-  namespace: mks
+  name: apply-manifest
 spec:
-  taskRef:
-    name: hello1
+  workspaces:
+  - name: source
+  params:
+    - name: manifest_dir
+      description: The directory in source that contains yaml manifests
+      type: string
+      default: "k8s/mks-config/deployment.yaml"
+  steps:
+    - name: apply
+      image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+      command: ["/bin/bash", "-c"]
+      workingDir: /workspace/source
+      args: 
+        - |-
+         echo "Applying manifests in $(inputs.params.manifest_dir) directory"
+         oc apply -f $(inputs.params.manifest_dir)
+         echo ------------------------

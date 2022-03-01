@@ -15,11 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: mkscontroller.example.mks/v1alpha1
-kind: MksTaskRun
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerBinding
 metadata:
-  name: test-mkstaskrun
-  namespace: mks
+  name: mks-server-triggerbinding
 spec:
-  taskRef:
-    name: hello1
+  params:
+  - name: git-repo-url
+    value: $(body.repository.url)
+  - name: git-repo-name
+    value: $(body.repository.name)
+  - name: git-revision
+    value: $(body.head_commit.id)
