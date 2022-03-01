@@ -29,5 +29,3 @@ data:
             }
     }
 
-
-# echo githubHandle:githubtoken | base64 >> "auth"

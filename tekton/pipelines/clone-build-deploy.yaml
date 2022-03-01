@@ -1,3 +1,4 @@
+
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2022 Satyam Bhardwaj <sabhardw@redhat.com>
 # SPDX-FileCopyrightText: 2022 Utkarsh Chaurasia <uchauras@redhat.com>
@@ -40,10 +41,6 @@ spec:
       type: string
       description: image to be build from the code
       default: "./Dockerfile"
-    - name: skip_push
-      type: string
-      description: whether to skip to push or not
-      default: "true"
   tasks:
     - name: clone-repo
       taskRef:
@@ -62,14 +59,12 @@ spec:
           value: $(params.git-revision)
     - name: build-image
       taskRef:
-        name: kaniko
+        name: build
       params:
       - name: IMAGE
         value: $(params.IMAGE)
       workspaces:
       - name: source
-        workspace: shared-workspace
-      - name: dockerconfig
         workspace: shared-workspace
       runAfter:
         - clone-repo

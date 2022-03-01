@@ -18,18 +18,51 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: build-image
+  name: build
 spec:
   workspaces:
-  - name: source
+    - name: source
   params:
-    - name: manifest_dir
-      description: The directory in source that contains yaml manifests
-      type: string
-      default: "k8s/mks-config/deployment.yaml"
+  - name: IMAGE
+    description: Reference of the image build task will produce.
+  - name: BUILDER_IMAGE
+    description: The location of the buildah builder image.
+    default: quay.io/buildah/stable:v1.18.0
+  - name: STORAGE_DRIVER
+    description: Set buildah storage driver
+    default: overlay
+  - name: DOCKERFILE
+    description: Path to the Dockerfile to build.
+    default: ./Dockerfile
+  - name: CONTEXT
+    description: Path to the directory to use as context.
+    default: .
+  - name: TLSVERIFY
+    description: Verify the TLS on the registry endpoint (for push/pull to a non-TLS registry)
+    default: "true"
+
   steps:
-    - name: build-image
-      image: docker
-      command:
-        - /bin/bash
-      args: ['-c', 'echo hello world']
+  - name: build
+    image: gcr.io/cloud-builders/docker
+    # image: $(params.BUILDER_IMAGE)
+    workingDir: $(workspaces.source.path)
+    args:
+        [
+          "build",
+          "--no-cache",
+          "--tag",
+          "$(params.IMAGE)",
+          "--file",
+          "$(params.DOCKERFILE)",
+          "$(params.CONTEXT)",
+        ]
+    securityContext:
+      runAsUser: 0
+    volumeMounts:
+      - name: docker-socket
+        mountPath: /var/run/docker.sock
+  volumes:
+    - name: docker-socket
+      hostPath:
+        path: /var/run/docker.sock
+        type: Socket

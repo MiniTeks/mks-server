@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: tekton.dev/v1beta1
+apiVersion: tekton.dev/v1alpha1
 kind: PipelineRun
 metadata:
   creationTimestamp: null
@@ -33,15 +33,11 @@ spec:
   - name: git-revision
     value: main
   - name: git-url
-    value: ' https://github.com/MiniTeks/mks-server'
-  - name: skip_push
-    value: "true"
+    value: https://github.com/MiniTeks/mks-server
   pipelineRef:
     name: clone-build-deploy
   workspaces:
   - name: shared-workspace
     persistentVolumeClaim:
       claimName: source-pvc
-    configMap:
-      name: docker-config
 status: {}
