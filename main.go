@@ -25,6 +25,7 @@ import (
 
 	mksclientset "github.com/MiniTeks/mks-server/pkg/client/clientset/versioned"
 	informers "github.com/MiniTeks/mks-server/pkg/client/informers/externalversions"
+	mpcontroller "github.com/MiniTeks/mks-server/pkg/controllers/mkspipeline"
 	mprcontroller "github.com/MiniTeks/mks-server/pkg/controllers/mkspipelinerun"
 	mtcontroller "github.com/MiniTeks/mks-server/pkg/controllers/mkstask"
 	mtrcontroller "github.com/MiniTeks/mks-server/pkg/controllers/mkstaskrun"
@@ -86,6 +87,7 @@ func main() {
 	mprc := mprcontroller.NewController(kubeClient, mksClient, informers.Mkscontroller().V1alpha1().MksPipelineRuns(), redisClient)
 	mtc := mtcontroller.NewController(*mksClient, informers.Mkscontroller().V1alpha1().MksTasks(), redisClient)
 	mtrc := mtrcontroller.NewController(kubeClient, mksClient, informers.Mkscontroller().V1alpha1().MksTaskRuns(), redisClient)
+	mp := mpcontroller.NewController(kubeClient, mksClient, informers.Mkscontroller().V1alpha1().MksPipelines(), redisClient)
 	klog.Info("\tListening for mks-resources...\n")
 	informers.Start(ch)
 
@@ -93,6 +95,7 @@ func main() {
 	mprc.Run(ch)
 	mtc.Run(ch)
 	mtrc.Run(ch)
+	mp.Run(ch)
 	fmt.Println(informers)
 }
 
@@ -107,5 +110,5 @@ func init() {
 	flag.StringVar(&master, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&dbAddr, "addr", "127.0.0.1:6379", "The address of the redis server")
 	flag.StringVar(&password, "password", "12345", "The password of the redis database.")
-	
+
 }

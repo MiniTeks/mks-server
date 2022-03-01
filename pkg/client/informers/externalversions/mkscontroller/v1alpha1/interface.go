@@ -24,6 +24,8 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
+	// MksPipelines returns a MksPipelineInformer.
+	MksPipelines() MksPipelineInformer
 	// MksPipelineRuns returns a MksPipelineRunInformer.
 	MksPipelineRuns() MksPipelineRunInformer
 	// MksTasks returns a MksTaskInformer.
@@ -41,6 +43,11 @@ type version struct {
 // New returns a new Interface.
 func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakListOptions internalinterfaces.TweakListOptionsFunc) Interface {
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
+}
+
+// MksPipelines returns a MksPipelineInformer.
+func (v *version) MksPipelines() MksPipelineInformer {
+	return &mksPipelineInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // MksPipelineRuns returns a MksPipelineRunInformer.

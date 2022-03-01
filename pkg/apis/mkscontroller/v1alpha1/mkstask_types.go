@@ -71,10 +71,8 @@ type MksTask struct {
 // - Command 	command to be run.
 // - Args 		arguments to the command.
 type MksTaskSpec struct {
-	Name    string `json:"name"`    // name of the task
-	Image   string `json:"image"`   // docker image for the task
-	Command string `json:"command"` // command to be run
-	Args    string `json:"args"`    // arguments to the command
+	Steps  []MksTaskSteps `json:"steps"`
+	Params []MksParamSpec `json:"params,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -84,4 +82,12 @@ type MksTaskList struct {
 	metav1.ListMeta `json:"metadata"`
 
 	Items []MksTask `json:"items"`
+}
+
+type MksTaskSteps struct {
+	Name       string `json:"name"`    // name of the task
+	Image      string `json:"image"`   // docker image for the task
+	Command    string `json:"command"` // command to be run
+	WorkingDir string `json:"workingDir,omitempty"`
+	Args       string `json:"args"` // arguments to the command
 }

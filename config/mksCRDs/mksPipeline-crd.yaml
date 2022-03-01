@@ -18,7 +18,7 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: mkspipelineruns.mkscontroller.example.mks
+  name: mkspipelines.mkscontroller.example.mks
 spec:
   group: mkscontroller.example.mks
   versions:
@@ -33,11 +33,6 @@ spec:
             spec:
               type: object
               properties:
-                pipelineRef:
-                  type: object
-                  properties:
-                    name:
-                      type: string
                 workspaces:
                   type: array
                   items:
@@ -45,16 +40,6 @@ spec:
                     properties:
                       name:
                         type: string
-                      persistentVolumeClaim:
-                        type: object
-                        properties:
-                          claimName:
-                            type: string
-                      configMap:
-                        type: object
-                        properties:
-                          name:
-                            type: string
                 params:
                   type: array
                   items:
@@ -62,10 +47,51 @@ spec:
                     properties:
                       name:
                         type: string
-                      value:
+                      type:
                         type: string
+                      description:
+                        type: string
+                      default:
+                        type: string
+                tasks:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      taskRef:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          kind:
+                            type: string
+                      workspaces:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            workspace:
+                              type: string
+                      params:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            value:
+                              type: string
+                      runAfter:
+                        type: array
+                        items:
+                          type: string
+
 
   names:
-    kind: MksPipelineRun
-    plural: mkspipelineruns
+    kind: MksPipeline
+    plural: mkspipelines
   scope: Namespaced
