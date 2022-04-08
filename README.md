@@ -147,7 +147,7 @@ in advance.
 
 ## Architectural Design
 
-(_Diagram will be added here_)
+![MKS-Server Architectural Design](images/MKS_Design.jpeg)
 
 ---
 
